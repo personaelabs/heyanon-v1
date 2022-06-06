@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { postToIpfs } from "../../lib/ipfs";
 
 import { postTweet } from "../../lib/twitter";
 import { verifyProof } from "../../lib/zkp";
@@ -11,9 +12,8 @@ import { verifyProof } from "../../lib/zkp";
  */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse
 ) {
-  // TODO: message?
   let body = req.body;
   if (typeof req.body === "string") {
     body = JSON.parse(body);
@@ -21,11 +21,15 @@ export default async function handler(
   console.log(body);
   const proof = body.proof;
   const publicSignals = body.publicSignals;
+  const message = body.message;
+
+  // TODO: do we need error handling here?
+  const cid = await postToIpfs(proof);
 
   const verified = await verifyProof(proof, publicSignals);
   if (verified) {
-    // TODO: figure out message + proof rendering
-    await postTweet("");
+    await postTweet(message);
+    res.status(200).json({ ipfsHash: cid.toString() });
   } else {
     console.log(`Failed verification for proof ${proof}`);
     res.status(200).json("failed verification");
