@@ -6,6 +6,8 @@ import { Button } from "../lib/components";
 import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
+import { merkleTree, addressInTree } from "../lib/merkleTree";
+
 // TODO: this is a page for creating proofs + sending with message
 // UI 'steps':
 // 0. connect metamask
@@ -14,8 +16,9 @@ import styles from "../styles/Home.module.css";
 // 3. submit proof + msg to server
 // 4. verified! tweet coming soon
 
+// TODO: first testing with smaller proof, then test against the big guy...
 const getStep = (ethAddress: string | null) => {
-  if (!ethAddress) return 0;
+  if (!ethAddress || !addressInTree(ethAddress)) return 0;
 
   // if no proof + not creating proof, return 1
 
@@ -25,20 +28,11 @@ const getStep = (ethAddress: string | null) => {
 
   // else 4
 
-  // TODO:
-  // if (!zkProof) return 2;
-  // if (!proofVerifiedInfo?.submitted) return 3;
-  return 4;
+  return 1;
 };
 
-const TITLES = [
-  "Connect Metamask and select address",
-  "Prove yourself",
-  "Enter message",
-];
-
 const Home: NextPage = () => {
-  const [metamaskAddress, setMetamaskAddress] = useState<string | null>(null);
+  const [metamaskAddress, setMetamaskAddress] = useState<string>("");
 
   const connectToMetamask = () => {
     const connectToMetamaskAsync = async () => {
@@ -49,6 +43,13 @@ const Home: NextPage = () => {
       setMetamaskAddress(addr);
     };
     connectToMetamaskAsync();
+  };
+
+  const generateProof = () => {
+    // 1. get input
+    // incl. getting signature!
+    // 2. put input in generateProof
+    // TODO: store proof somewhere
   };
 
   const step = getStep(metamaskAddress);
@@ -63,25 +64,26 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         {step == 0 && (
           <div>
-            <p className={styles.description}>Choose DAO hack victim address</p>
+            {!metamaskAddress ? (
+              <p className={styles.description}>
+                Choose address for proof generation
+              </p>
+            ) : (
+              <p className={styles.description}>Address not found!</p>
+            )}
 
             <Button onClick={connectToMetamask}>Connect Metamask</Button>
           </div>
         )}
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+        {step == 1 && (
+          <div>
+            <p className={styles.description}>Generate proof</p>
+
+            <Button onClick={generateProof}>Generate</Button>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
