@@ -1,9 +1,14 @@
-import * as IPFS from "ipfs-core";
+import { create, IPFS } from "ipfs-core";
 
-const ipfs = IPFS.create();
+let ipfs: IPFS;
 
-// TODO: pin on pinata?
 export async function postToIpfs(message: string) {
-  const { cid } = await (await ipfs).add(message);
+  if (!ipfs) {
+    console.log("Creating IPFS node...");
+    ipfs = await create();
+  }
+
+  // TODO: pin on pinata?
+  const { cid } = await ipfs.add(message);
   return cid;
 }

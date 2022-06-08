@@ -7,18 +7,10 @@ import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
 import { merkleTree, addressInTree } from "../lib/merkleTree";
-import { buildInput } from "../lib/frontend/zkp";
+import { buildInput, generateProof } from "../lib/frontend/zkp";
 
-// TODO: this is a page for creating proofs + sending with message
-// UI 'steps':
-// 0. connect metamask
-// 1. sign data!
-// 1. generate proof
-// 2. (creating proof)
-// 3. submit proof + msg to server
-// 4. verified!
-
-// TODO: first testing with smaller proof, then test against the big guy...
+// TODO: add state for proof generating in the background!
+// NOTE: first testing with smaller, dummy proof, then test against the big guy...
 
 const Home: NextPage = () => {
   const [signer, setSigner] = useState<any | null>(null);
@@ -27,12 +19,23 @@ const Home: NextPage = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
 
+  const [proof, setProof] = useState(null);
+  const [publicSignals, setPublicSignals] = useState(null);
+
+  // TODO: also maybe store(/show) link to tweet?
+  const [proofIpfs, setProofIpfs] = useState(null);
+
   const getStep = () => {
-    if (!metamaskAddress || !addressInTree(metamaskAddress)) return 0;
+    if (metamaskAddress.length === 0 || !addressInTree(metamaskAddress))
+      return 0;
 
     if (!message || !signature) return 1;
 
-    return 2;
+    if (!proof || !publicSignals) return 2;
+
+    if (!proofIpfs) return 3;
+
+    return 4;
   };
 
   const connectToMetamask = () => {
@@ -47,11 +50,16 @@ const Home: NextPage = () => {
     connectToMetamaskAsync();
   };
 
-  const generateProof = () => {
-    const input = buildInput(metamaskAddress);
-    // 1. gen input
-    // 2. put input in generateProof
-    // 3. store proof in state
+  const genProof = () => {
+    const genProofAsync = async () => {
+      const input = buildInput(metamaskAddress, signature);
+      const { proof, publicSignals } = await generateProof(input);
+
+      setProof(proof);
+      setPublicSignals(publicSignals);
+    };
+
+    genProofAsync();
   };
 
   const signMessage = () => {
@@ -75,6 +83,21 @@ const Home: NextPage = () => {
     signMessageAsync();
   };
 
+  const submit = async () => {
+    const resp = await fetch("/api/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        proof,
+        publicSignals,
+        message,
+      }),
+    });
+    console.log(resp);
+  };
+
   const step = getStep();
 
   return (
@@ -82,6 +105,8 @@ const Home: NextPage = () => {
       <Head>
         <title>Prove Yourself</title>
         <link rel="icon" href="/favicon.ico" />
+
+        <script async src="snarkjs.min.js"></script>
       </Head>
 
       <main className={styles.main}>
@@ -101,7 +126,8 @@ const Home: NextPage = () => {
 
         {step == 1 && (
           <div>
-            <p className={styles.description}>Sign your message</p>
+            {/* TODO: validate tweet + ipfs hash < tweet limit */}
+            <p className={styles.description}>Submit Message</p>
 
             <input
               type="text"
@@ -121,7 +147,28 @@ const Home: NextPage = () => {
           <div>
             <p className={styles.description}>Generate proof</p>
 
-            <Button onClick={generateProof}>Generate</Button>
+            <Button onClick={genProof}>Generate</Button>
+          </div>
+        )}
+
+        {step == 3 && (
+          <div>
+            <p className={styles.description}>Submit Proof and Message</p>
+
+            <p>
+              Message - <strong>{message}</strong>
+            </p>
+
+            <p>TODO: display proof json as well</p>
+            {/* TODO: display proof too */}
+
+            <Button onClick={submit}>Submit</Button>
+          </div>
+        )}
+
+        {step == 4 && (
+          <div>
+            <p className={styles.description}>Message posted successfully!</p>
           </div>
         )}
       </main>

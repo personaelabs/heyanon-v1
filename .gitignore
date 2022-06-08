@@ -36,3 +36,7 @@ yarn-error.log*
 
 package-lock.json
 yarn.lock
+
+# snarkjs browser payload
+*.zkey
+*.wasm
