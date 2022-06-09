@@ -1,6 +1,6 @@
 import { groth16 } from "snarkjs";
 
-import { vkey } from "./vkey";
+import { daoHackVkey } from "./vkey";
 import { merkleTree } from "./merkleTree";
 
 // TODO: we can set the circuit we're using in a variable and have that propagate down to
@@ -10,7 +10,7 @@ const zkeyPath = "/dummy.zkey";
 const wasmPath = "/dummy.wasm";
 
 export async function verifyProof(proof: any, publicSignals: any) {
-  const proofVerified = await groth16.verify(vkey, publicSignals, proof);
+  const proofVerified = await groth16.verify(daoHackVkey, publicSignals, proof);
 
   return proofVerified;
 }
