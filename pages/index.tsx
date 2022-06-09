@@ -41,7 +41,6 @@ const Home: NextPage = () => {
   const connectToMetamask = () => {
     const connectToMetamaskAsync = async () => {
       const { provider, signer, network } = await setupWeb3();
-      // console.log(provider, signer, network)
       setSigner(signer);
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
@@ -127,7 +126,7 @@ const Home: NextPage = () => {
         {step == 1 && (
           <div>
             {/* TODO: validate tweet + ipfs hash < tweet limit */}
-            <p className={styles.description}>Submit Message</p>
+            <p className={styles.description}>Sign Message</p>
 
             <input
               type="text"

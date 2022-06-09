@@ -18,7 +18,7 @@ export default async function handler(
   if (typeof req.body === "string") {
     body = JSON.parse(body);
   }
-  console.log(`Received request: ${body}`);
+  console.log(`Received request: ${JSON.stringify(body)}`);
   const proof = body.proof;
   const publicSignals = body.publicSignals;
   const message = body.message;
