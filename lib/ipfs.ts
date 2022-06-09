@@ -1,12 +1,7 @@
-import { create, IPFS } from "ipfs-core";
-
-let ipfs: IPFS;
+import { create } from "ipfs-http-client";
 
 export async function postToIpfs(message: string) {
-  if (!ipfs) {
-    console.log("Creating IPFS node...");
-    ipfs = await create();
-  }
+  const ipfs = create({ host: "localhost", port: 5001, protocol: "http" });
 
   // TODO: pin on pinata?
   const { cid } = await ipfs.add(message);
