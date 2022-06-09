@@ -1,8 +1,8 @@
 // TODO: we can set the circuit we're using in a variable and have that propagate down to
 // all of these variable names
 // I should also not put this stuff in version control...
-const zkeyPath = "/dummy.zkey";
-const wasmPath = "/dummy.wasm";
+const zkeyPath = "/dao_hack_confession.zkey";
+const wasmPath = "/dao_hack_confession.wasm";
 
 // NOTE: assumes snarkjs.min.js is loaded
 export async function generateProof(input: any) {
