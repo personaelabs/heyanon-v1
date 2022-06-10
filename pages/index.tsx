@@ -9,6 +9,8 @@ import styles from "../styles/Home.module.css";
 import { merkleTree, addressInTree } from "../lib/merkleTree";
 import { buildInput, generateProof } from "../lib/frontend/zkp";
 
+import { ethers } from "ethers";
+
 // TODO: add state for proof generating in the background!
 // NOTE: first testing with smaller, dummy proof, then test against the big guy...
 
@@ -17,6 +19,9 @@ const Home: NextPage = () => {
   const [metamaskAddress, setMetamaskAddress] = useState<string>("");
 
   const [message, setMessage] = useState<string | null>(null);
+
+  // TODO: msgHash, pubkey, etc.
+
   const [signature, setSignature] = useState<string | null>(null);
 
   const [proof, setProof] = useState(null);
@@ -28,6 +33,9 @@ const Home: NextPage = () => {
   const getStep = () => {
     if (metamaskAddress.length === 0 || !addressInTree(metamaskAddress))
       return 0;
+
+    // TODO: remove
+    return 1;
 
     if (!message || !signature) return 1;
 
@@ -63,20 +71,27 @@ const Home: NextPage = () => {
 
   const signMessage = () => {
     const signMessageAsync = async () => {
-      const domain = {
-        name: "dao hack gossip",
-        version: "1",
-        chainId: 1,
-      };
-      const types = {
-        Message: [{ name: "message", type: "string" }],
-      };
-      const value = {
-        message,
-      };
-
-      const signature = await signer._signTypedData(domain, types, value);
+      // NOTE: we can just use signMessage for a decent UX here!
+      const signature = await signer.signMessage(message);
+      console.log(`Signature: ${signature}`);
       setSignature(signature);
+
+      // TODO: probably want to encapsulate this somewhere else?
+      const msgHash = ethers.utils.hashMessage(message!);
+      const msgHashBytes = ethers.utils.arrayify(msgHash);
+      console.log(`Message hash: ${msgHash}`);
+
+      const pubkey = ethers.utils.recoverPublicKey(msgHashBytes, signature);
+      console.log(`Pubkey: ${pubkey}`);
+
+      const recoveredAddress = ethers.utils.computeAddress(pubkey);
+      const actualAddress = await signer.getAddress();
+
+      if (recoveredAddress != actualAddress) {
+        console.log(
+          `Address mismatch on recovery! Recovered ${recoveredAddress} but signed with ${actualAddress}`
+        );
+      }
     };
 
     signMessageAsync();
