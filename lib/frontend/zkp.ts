@@ -26,7 +26,11 @@ export async function generateProof(input: any) {
 }
 
 function bigintToTuple(x: bigint) {
-  let mod: bigint = 2n ** 64n;
+  let mod: bigint = 1n;
+  for (var idx = 0; idx < 64; idx++) {
+    mod = mod * 2n;
+  }
+
   let ret: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
 
   var x_temp: bigint = x;
