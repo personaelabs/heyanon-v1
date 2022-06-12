@@ -6,7 +6,7 @@ import { Button } from "../lib/components";
 import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
-import { merkleTree, addressInTree } from "../lib/merkleTree";
+import { addressInTree } from "../lib/merkleTree";
 import { buildInput, generateProof } from "../lib/frontend/zkp";
 
 import { ethers } from "ethers";
@@ -16,13 +16,13 @@ import { ethers } from "ethers";
 
 const Home: NextPage = () => {
   const [signer, setSigner] = useState<any | null>(null);
-  const [metamaskAddress, setMetamaskAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
 
-  const [message, setMessage] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string>("");
 
-  // TODO: msgHash, pubkey, etc.
-
-  const [signature, setSignature] = useState<string | null>(null);
+  const [sig, setSig] = useState<string>("");
+  const [msghash, setMsghash] = useState<string>("");
+  const [pubkey, setPubkey] = useState<string>("");
 
   const [proof, setProof] = useState(null);
   const [publicSignals, setPublicSignals] = useState(null);
@@ -31,13 +31,11 @@ const Home: NextPage = () => {
   const [proofIpfs, setProofIpfs] = useState(null);
 
   const getStep = () => {
-    if (metamaskAddress.length === 0 || !addressInTree(metamaskAddress))
-      return 0;
+    if (address.length === 0 || !addressInTree(address)) return 0;
 
-    // TODO: remove
-    return 1;
+    if (msg.length === 0 || sig.length === 0) return 1;
 
-    if (!message || !signature) return 1;
+    return 2;
 
     if (!proof || !publicSignals) return 2;
 
@@ -52,18 +50,19 @@ const Home: NextPage = () => {
       setSigner(signer);
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
-      setMetamaskAddress(addr);
+      setAddress(addr);
     };
     connectToMetamaskAsync();
   };
 
   const genProof = () => {
     const genProofAsync = async () => {
-      const input = buildInput(metamaskAddress, signature);
-      const { proof, publicSignals } = await generateProof(input);
+      const input = buildInput(address, pubkey, msghash, sig!);
+      console.log(`input: ${input}`);
+      // const { proof, publicSignals } = await generateProof(input);
 
-      setProof(proof);
-      setPublicSignals(publicSignals);
+      // setProof(proof);
+      // setPublicSignals(publicSignals);
     };
 
     genProofAsync();
@@ -71,22 +70,22 @@ const Home: NextPage = () => {
 
   const signMessage = () => {
     const signMessageAsync = async () => {
-      // NOTE: we can just use signMessage for a decent UX here!
-      const signature = await signer.signMessage(message);
-      console.log(`Signature: ${signature}`);
-      setSignature(signature);
+      const signature = await signer.signMessage(msg);
+      console.log(`sig: ${signature}`);
+      setSig(signature);
 
-      // TODO: probably want to encapsulate this somewhere else?
-      const msgHash = ethers.utils.hashMessage(message!);
+      const msgHash = ethers.utils.hashMessage(msg!);
       const msgHashBytes = ethers.utils.arrayify(msgHash);
-      console.log(`Message hash: ${msgHash}`);
+      console.log(`msghash: ${msgHash}`);
+      setMsghash(msgHash);
 
       const pubkey = ethers.utils.recoverPublicKey(msgHashBytes, signature);
-      console.log(`Pubkey: ${pubkey}`);
+      console.log(`pk: ${pubkey}`);
+      setPubkey(pubkey);
 
+      // NOTE: this check not *strictly* necessary, but no harm
       const recoveredAddress = ethers.utils.computeAddress(pubkey);
       const actualAddress = await signer.getAddress();
-
       if (recoveredAddress != actualAddress) {
         console.log(
           `Address mismatch on recovery! Recovered ${recoveredAddress} but signed with ${actualAddress}`
@@ -106,7 +105,7 @@ const Home: NextPage = () => {
       body: JSON.stringify({
         proof,
         publicSignals,
-        message,
+        message: msg,
       }),
     });
     console.log(resp);
@@ -126,7 +125,7 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         {step == 0 && (
           <div>
-            {!metamaskAddress ? (
+            {!address ? (
               <p className={styles.description}>
                 Choose address for proof generation
               </p>
@@ -146,10 +145,10 @@ const Home: NextPage = () => {
             <input
               type="text"
               name="message"
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => setMsg(e.target.value)}
             ></input>
             <Button
-              disabled={message === null || message.length === 0}
+              disabled={msg === null || msg.length === 0}
               onClick={signMessage}
             >
               Sign
@@ -170,7 +169,7 @@ const Home: NextPage = () => {
             <p className={styles.description}>Submit Proof and Message</p>
 
             <p>
-              Message - <strong>{message}</strong>
+              Message - <strong>{msg}</strong>
             </p>
 
             <p>TODO: display proof json as well</p>

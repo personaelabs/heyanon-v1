@@ -1,5 +1,8 @@
 // TODO: we can set the circuit we're using in a variable and have that propagate down to
 // all of these variable names
+
+import { merkleTree } from "../merkleTree";
+
 // I should also not put this stuff in version control...
 const zkeyPath = "/dao_hack_confession.zkey";
 const wasmPath = "/dao_hack_confession.wasm";
@@ -22,22 +25,47 @@ export async function generateProof(input: any) {
   };
 }
 
-// NOTE: dummy input for now
-// TODO: get pubkey, perhaps using https://github.com/ethers-io/ethers.js/issues/447
-// TODO: pull in msghash as well
-export function buildInput(address: string, signature: string | null) {
+function bigintToTuple(x: bigint) {
+  let mod: bigint = 2n ** 64n;
+  let ret: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
+
+  var x_temp: bigint = x;
+  for (var idx = 0; idx < ret.length; idx++) {
+    ret[idx] = x_temp % mod;
+    x_temp = x_temp / mod;
+  }
+  return ret;
+}
+
+function pubkeyStrToXY(pk: string) {
+  // remove 0x04, then divide in 2
+  let pkUnprefixed = pk.substring(4);
+
+  let xStr = pkUnprefixed.substring(0, 64);
+  let yStr = pkUnprefixed.substring(64);
+
+  return [BigInt("0x" + xStr), BigInt("0x" + yStr)];
+}
+
+export function buildInput(
+  address: string,
+  pubkey: string,
+  msghash: string,
+  sig: string
+) {
+  // TODO: I don't think this is the right format! verify
+  const r = BigInt("0x" + sig.substring(2, 66));
+  const s = BigInt("0x" + sig.substring(66, 130));
+
   return {
-    root: 0,
-    branch: [],
-    branch_side: [],
+    root: merkleTree.root,
+    branch: merkleTree.addressToBranch[parseInt(address)],
+    branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
 
-    r: [0, 1, 2, 3],
-    s: [1, 2, 3, 4],
-    msghash: [1, 2, 3, 4],
+    r: bigintToTuple(r),
+    s: bigintToTuple(s),
+    msghash: bigintToTuple(BigInt(msghash)),
 
-    pubkey: [
-      [1, 2, 3, 4],
-      [1, 4, 2, 3],
-    ],
+    pubkey: pubkeyStrToXY(pubkey).map(bigintToTuple),
   };
 }
