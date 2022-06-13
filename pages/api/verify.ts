@@ -23,12 +23,13 @@ export default async function handler(
   const publicSignals = body.publicSignals;
   const message = body.message;
 
+  const verified = await verifyProof(proof, publicSignals);
+  console.log(`Verification status: ${verified}`);
+
   // TODO: do we need error handling here?
   const cid = await postToIpfs(JSON.stringify(proof));
   console.log(`Posted to ipfs: ${cid.toString()}`);
 
-  const verified = await verifyProof(proof, publicSignals);
-  console.log(`Verification status: ${verified}`);
   if (verified) {
     await postTweet(`${message}
     
