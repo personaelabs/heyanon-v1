@@ -9,7 +9,9 @@ const wasmPath = "/dao_hack_confession.wasm";
 
 // NOTE: assumes snarkjs.min.js is loaded
 export async function generateProof(input: any) {
-  console.log(`generating proof for input ${input}`);
+  // TODO: figure out how to generate this s.t. it passes build
+  console.log("generating proof for input");
+  console.log(input);
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     input,
     wasmPath,
@@ -57,7 +59,6 @@ export function buildInput(
   msghash: string,
   sig: string
 ) {
-  // TODO: I don't think this is the right format! verify
   const r = BigInt("0x" + sig.substring(2, 66));
   const s = BigInt("0x" + sig.substring(66, 130));
 

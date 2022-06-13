@@ -58,7 +58,13 @@ const Home: NextPage = () => {
   const genProof = () => {
     const genProofAsync = async () => {
       const input = buildInput(address, pubkey, msghash, sig!);
-      console.log(`input: ${input}`);
+      console.log(
+        JSON.stringify(
+          input,
+          (k, v) => (typeof v == "bigint" ? v.toString() : v),
+          2
+        )
+      );
       // const { proof, publicSignals } = await generateProof(input);
 
       // setProof(proof);
