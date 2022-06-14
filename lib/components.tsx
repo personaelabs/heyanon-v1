@@ -6,3 +6,7 @@ export const Button = styled.button`
   background: #fff;
   color: black;
 `;
+
+export const ErrorMsg = styled.p`
+  color: red;
+`;

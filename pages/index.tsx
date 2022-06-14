@@ -1,8 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
 import { useState } from "react";
-import { Button } from "../lib/components";
+import { Button, ErrorMsg } from "../lib/components";
 import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
@@ -13,6 +12,8 @@ import { ethers } from "ethers";
 
 // TODO: add state for proof generating in the background!
 // NOTE: first testing with smaller, dummy proof, then test against the big guy...
+
+const MAX_MESSAGE_LENGTH = 280 - (46 + 8); // tweet size minus ipfs hash length and '\nipfs()'
 
 const Home: NextPage = () => {
   const [signer, setSigner] = useState<any | null>(null);
@@ -147,14 +148,22 @@ const Home: NextPage = () => {
           <div>
             {/* TODO: validate tweet + ipfs hash < tweet limit */}
             <p className={styles.description}>Sign Message</p>
-
-            <input
-              type="text"
-              name="message"
-              onChange={(e) => setMsg(e.target.value)}
-            ></input>
+            <div>
+              <input
+                type="text"
+                name="message"
+                onChange={(e) => setMsg(e.target.value)}
+              ></input>
+            </div>
+            {msg.length > MAX_MESSAGE_LENGTH && (
+              <ErrorMsg>message too long!</ErrorMsg>
+            )}
             <Button
-              disabled={msg === null || msg.length === 0}
+              disabled={
+                msg === null ||
+                msg.length === 0 ||
+                msg.length > MAX_MESSAGE_LENGTH
+              }
               onClick={signMessage}
             >
               Sign
