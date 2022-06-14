@@ -23,6 +23,8 @@ export default async function handler(
   const publicSignals = body.publicSignals;
   const message = body.message;
 
+  // TODO: it's super important that we test that the merkle root is legit here! Else they could create their own root...
+
   const verified = await verifyProof(proof, publicSignals);
   console.log(`Verification status: ${verified}`);
 
