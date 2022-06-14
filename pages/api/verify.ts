@@ -24,7 +24,7 @@ export default async function handler(
   const publicSignals = body.publicSignals;
   const message = body.message;
 
-  if (publicSignals.root !== merkleTree.root) {
+  if (publicSignals[0] !== merkleTree.root) {
     res.status(401).json("incorrect merkle root used");
   } else {
     const verified = await verifyProof(proof, publicSignals);
