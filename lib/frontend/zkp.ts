@@ -43,14 +43,43 @@ function bigintToTuple(x: bigint) {
   return ret;
 }
 
-function pubkeyStrToXY(pk: string) {
-  // remove 0x04, then divide in 2
-  let pkUnprefixed = pk.substring(4);
+function bigIntToArray(n: number, k: number, x: bigint) {
+  let divisor = 1n;
+  for (var idx = 0; idx < n; idx++) {
+    divisor = divisor * 2n;
+  }
 
-  let xStr = pkUnprefixed.substring(0, 64);
-  let yStr = pkUnprefixed.substring(64);
+  let ret = [];
+  var x_temp = BigInt(x);
+  for (var idx = 0; idx < k; idx++) {
+    ret.push(x_temp % divisor);
+    x_temp = x_temp / divisor;
+  }
+  return ret;
+}
 
-  return [BigInt("0x" + xStr), BigInt("0x" + yStr)];
+// NOTE: taken from generation code in dizkus-circuits tests
+function pubkeyToXYArrays(pk: string) {
+  const XArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(4, 4 + 64))).map(
+    (el) => el.toString()
+  );
+  const YArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(68, 68 + 64))).map(
+    (el) => el.toString()
+  );
+
+  return [XArr, YArr];
+}
+
+// NOTE: taken from generation code in dizkus-circuits tests
+function sigToRSArrays(sig: string) {
+  const rArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(2, 2 + 64))).map(
+    (el) => el.toString()
+  );
+  const sArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(66, 66 + 64))).map(
+    (el) => el.toString()
+  );
+
+  return [rArr, sArr];
 }
 
 export function buildInput(
@@ -59,18 +88,17 @@ export function buildInput(
   msghash: string,
   sig: string
 ) {
-  const r = BigInt("0x" + sig.substring(2, 66));
-  const s = BigInt("0x" + sig.substring(66, 130));
+  const [r, s] = sigToRSArrays(sig);
 
   return {
     root: merkleTree.root,
     branch: merkleTree.addressToBranch[parseInt(address)],
     branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
 
-    r: bigintToTuple(r),
-    s: bigintToTuple(s),
-    msghash: bigintToTuple(BigInt(msghash)),
+    r,
+    s,
+    msghash: bigIntToArray(64, 4, BigInt(msghash)),
 
-    pubkey: pubkeyStrToXY(pubkey).map(bigintToTuple),
+    pubkey: pubkeyToXYArrays(pubkey),
   };
 }
