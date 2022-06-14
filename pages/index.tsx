@@ -7,7 +7,7 @@ import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
 import { addressInTree } from "../lib/merkleTree";
-import { buildInput, generateProof } from "../lib/frontend/zkp";
+import { buildInput, buildNoSigInput, generateProof, downloadProofFiles } from "../lib/frontend/zkp";
 
 import { ethers } from "ethers";
 
@@ -35,8 +35,6 @@ const Home: NextPage = () => {
 
     if (msg.length === 0 || sig.length === 0) return 1;
 
-    return 2;
-
     if (!proof || !publicSignals) return 2;
 
     if (!proofIpfs) return 3;
@@ -56,8 +54,10 @@ const Home: NextPage = () => {
   };
 
   const genProof = () => {
+    let filename = "group_message_64_4_7";
+
     const genProofAsync = async () => {
-      const input = buildInput(address, pubkey, msghash, sig!);
+      const input = buildInput(address, pubkey, msghash, sig);
       console.log(
         JSON.stringify(
           input,
@@ -65,10 +65,15 @@ const Home: NextPage = () => {
           2
         )
       );
-      // const { proof, publicSignals } = await generateProof(input);
 
-      // setProof(proof);
-      // setPublicSignals(publicSignals);
+      console.log("Downloading files");
+      await downloadProofFiles(filename);
+    
+      console.log("Generating proof");
+      const { proof, publicSignals } = await generateProof(input, filename);
+
+      setProof(proof);
+      setPublicSignals(publicSignals);
     };
 
     genProofAsync();
