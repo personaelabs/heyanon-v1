@@ -9,16 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "circomlibjs": "^0.1.2",
     "ethers": "5.6.8",
     "got": "12.1.0",
     "ipfs-core": "0.15.1",
     "ipfs-http-client": "57.0.1",
+    "localforage": "^1.10.0",
     "needle": "3.1.0",
     "next": "12.1.6",
     "oauth-1.0a": "2.2.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "snarkjs": "0.4.19",
+    "snarkjs": "git+https://github.com/vb7401/snarkjs.git#fd9612892ec37f60f5ad492868caacbd44a259ab",
     "styled-components": "5.3.5"
   },
   "devDependencies": {
