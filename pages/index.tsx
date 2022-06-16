@@ -43,9 +43,11 @@ const Home: NextPage = () => {
 
     if (msg.length === 0 || sig.length === 0) return 1;
 
-    if (!proof || !publicSignals) return 2;
+    if (!proof || !publicSignals) {
+      if (loadingMessage.length === 0) return 2;
 
-    if (loadingMessage.length > 0) return 3;
+      return 3;
+    }
 
     if (!proofIpfs) return 4;
 
