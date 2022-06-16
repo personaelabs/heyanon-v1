@@ -1,14 +1,19 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
-import { Button, ErrorMsg } from "../lib/components";
+import { Button, ErrorMsg, LoadingGroup } from "../lib/components";
 import { setupWeb3 } from "../lib/web3";
 import styles from "../styles/Home.module.css";
 
 import { addressInTree } from "../lib/merkleTree";
-import { buildInput, buildNoSigInput, generateProof, downloadProofFiles } from "../lib/frontend/zkp";
+import {
+  buildInput,
+  generateProof,
+  downloadProofFiles,
+} from "../lib/frontend/zkp";
 
 import { ethers } from "ethers";
+import { ClipLoader } from "react-spinners";
 
 // TODO: add state for proof generating in the background!
 // NOTE: first testing with smaller, dummy proof, then test against the big guy...
@@ -25,6 +30,8 @@ const Home: NextPage = () => {
   const [msghash, setMsghash] = useState<string>("");
   const [pubkey, setPubkey] = useState<string>("");
 
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
+
   const [proof, setProof] = useState(null);
   const [publicSignals, setPublicSignals] = useState(null);
 
@@ -38,9 +45,11 @@ const Home: NextPage = () => {
 
     if (!proof || !publicSignals) return 2;
 
-    if (!proofIpfs) return 3;
+    if (loadingMessage.length > 0) return 3;
 
-    return 4;
+    if (!proofIpfs) return 4;
+
+    return 5;
   };
 
   const connectToMetamask = () => {
@@ -68,9 +77,11 @@ const Home: NextPage = () => {
       );
 
       console.log("Downloading files");
+      setLoadingMessage("downloading proving key...");
       await downloadProofFiles(filename);
-    
+
       console.log("Generating proof");
+      setLoadingMessage("generating proof...");
       const { proof, publicSignals } = await generateProof(input, filename);
 
       setProof(proof);
@@ -151,7 +162,6 @@ const Home: NextPage = () => {
 
         {step == 1 && (
           <div>
-            {/* TODO: validate tweet + ipfs hash < tweet limit */}
             <p className={styles.description}>Sign Message</p>
             <div>
               <input
@@ -185,6 +195,14 @@ const Home: NextPage = () => {
         )}
 
         {step == 3 && (
+          <LoadingGroup>
+            <ClipLoader color={"#D8801F"} loading={true} size={60} />
+
+            <p>{loadingMessage}</p>
+          </LoadingGroup>
+        )}
+
+        {step == 4 && (
           <div>
             <p className={styles.description}>Submit Proof and Message</p>
 
@@ -199,7 +217,7 @@ const Home: NextPage = () => {
           </div>
         )}
 
-        {step == 4 && (
+        {step == 5 && (
           <div>
             <p className={styles.description}>Message posted successfully!</p>
           </div>

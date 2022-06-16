@@ -10,3 +10,9 @@ export const Button = styled.button`
 export const ErrorMsg = styled.p`
   color: red;
 `;
+
+export const LoadingGroup = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;

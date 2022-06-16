@@ -20,6 +20,7 @@
     "oauth-1.0a": "2.2.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
+    "react-spinners": "0.12.0",
     "snarkjs": "git+https://github.com/vb7401/snarkjs.git#fd9612892ec37f60f5ad492868caacbd44a259ab",
     "styled-components": "5.3.5"
   },
