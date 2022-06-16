@@ -35,10 +35,10 @@ export default async function handler(
     console.log(`Posted to ipfs: ${cid.toString()}`);
 
     if (verified) {
-      await postTweet(`${message}
-    
-proof(ipfs): ${cid.toString()}`);
-      res.status(200).json({ ipfsHash: cid.toString() });
+      const tweetURL = await postTweet(`${message}
+
+  proof(ipfs): ${cid.toString()}`);
+      res.status(200).json({ ipfsHash: cid.toString(), tweetURL });
     } else {
       console.log(`Failed verification for proof ${proof}`);
       res.status(401).json("failed verification");

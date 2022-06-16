@@ -7,6 +7,9 @@ const consumerSecret = process.env.TWIT_CONSUMER_SECRET!;
 const accessToken = process.env.TWIT_ACCESS_TOKEN!;
 const accessSecret = process.env.TWIT_ACCESS_SECRET!;
 
+// NOTE: need to vary this if we manage multiple bots from here
+const twitterAccount = "DAOHackGossip";
+
 const oauth = new OAuth({
   consumer: {
     key: consumerKey,
@@ -34,7 +37,7 @@ const authHeader = oauth.toHeader(
 
 // NOTE: currently only works with the keys set in process.env
 async function postTweet(message: string) {
-  let { statusCode } = await got.post(endpointURL, {
+  let resp = await got.post(endpointURL, {
     json: { text: message },
     responseType: "json",
     headers: {
@@ -44,8 +47,12 @@ async function postTweet(message: string) {
     },
   });
 
-  if (statusCode !== 201) {
+  if (resp.statusCode !== 201) {
     throw new Error("error posting tweet");
+  } else {
+    const tweetID = resp["body"]["data"]["id"];
+    const tweetURL = `https://twitter.com/${twitterAccount}/status/${tweetID}`;
+    return tweetURL;
   }
 }
 
