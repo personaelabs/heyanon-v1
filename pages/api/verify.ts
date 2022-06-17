@@ -24,7 +24,7 @@ export default async function handler(
   const publicSignals = body.publicSignals;
   const message = body.message;
 
-  if (publicSignals[0] !== merkleTree.root) {
+  if (BigInt(publicSignals[0]) !== merkleTree.root) {
     res.status(401).json("incorrect merkle root used");
   } else {
     const verified = await verifyProof(proof, publicSignals);
@@ -35,10 +35,10 @@ export default async function handler(
     console.log(`Posted to ipfs: ${cid.toString()}`);
 
     if (verified) {
-      await postTweet(`${message}
+      const tweetURL = await postTweet(`${message}
     
 proof(ipfs): ${cid.toString()}`);
-      res.status(200).json({ ipfsHash: cid.toString() });
+      res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
     } else {
       console.log(`Failed verification for proof ${proof}`);
       res.status(401).json("failed verification");

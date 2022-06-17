@@ -136,17 +136,3 @@ export function buildInput(
     pubkey: pubkeyToXYArrays(pubkey),
   };
 }
-
-export function buildNoSigInput(
-  address: string,
-  pubkey: string,
-  msghash: string,
-  sig: string
-) {
-  return {
-    root: merkleTree.root,
-    branch: merkleTree.addressToBranch[parseInt(address)],
-    branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
-    pubkey: pubkeyStrToXY(pubkey).map(bigintToTuple),
-  };
-}
