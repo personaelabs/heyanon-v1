@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
+import { ClipLoader } from "react-spinners";
+
 
 const textArray = [
   'Running magic moon math in the browser 🌚🌚🌚',
@@ -6,24 +8,22 @@ const textArray = [
   'Welcome to the future of b l o c k c h a i n',
   "Pop quiz: what's the difference between the ate, tate pairing?",
   'Bonus question: are ate, kate, and tate related?',
-  "If you think this is slow, why don't you try solving y^2=x^2+Ax^2+x yourself?",
+  "If you think this is slow, why don't you try solving y^2=x^3+Ax+B yourself?",
   '👻👻👻👻👻👻',
-  //   'Running automated venture capitalist detection...',
+  'Running automated venture capitalist detection...',
 ]
 
-export default function LoadingText() {
-  let className = 'font-bold '
+type Props = {
+  currentStage: string
+}
+
+export default function LoadingText({ currentStage }: Props) {
   const [timer, setTimer] = useState(0)
   const [text, setText] = useState(textArray[0])
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimer((prevTimer) => prevTimer + 1) // <-- Change this line!
-    }, 1000)
-    return () => {
-      clearInterval(timer)
-    }
-  }, []) // Pass in empty array to run effect only once!
+    setTimeout(() => setTimer(timer+1), 1000)
+  }, [timer])
 
   useEffect(() => {
     const changeSeconds = 5
@@ -33,15 +33,25 @@ export default function LoadingText() {
 
   return (
     <div>
-      <div>
-        <span className="font-bold text-terminal-green">{`>>> `}</span>
+      <div className="flex">
+        <span className='font-bold pr-2'> Currently:  </span>
+        <span> {`${currentStage}`} </span>
+        <div className="pl-2">
+          <ClipLoader color={"black"} loading={true} size={15} />
+        </div>
+      </div>
+      <div className="flex">
+        <span className='font-bold pr-2'> Note:  </span>
+        <span> Your page may become unresponsive, but keep waiting! </span>
+      </div>
+      {/* <div>
+        <span className="font-bold text-heyanonyellow">{`>>> `}</span>
         <span> Running for {timer} seconds </span>
       </div>
       <div>
-        <span className="font-bold text-terminal-green">{`>>> `}</span>
-
-        <span className={className}>{text} </span>
-      </div>
+        <span className="font-bold text-heyanonyellow">{`>>> `}</span>
+        <span> {text} </span>
+      </div> */}
     </div>
   )
 }
