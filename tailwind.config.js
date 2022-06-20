@@ -7,7 +7,9 @@ module.exports = {
   theme: {
     extend: {},
     colors: {
-      heyanonred: "#F32636",
+      heyanonred: "#d12b38",
+      heyanonyellow: "#f2c43e",
+      heyanonblack: "#2a2c2e",
     },
   },
   plugins: [],

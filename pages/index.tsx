@@ -5,7 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from "react";
 import { ethers } from "ethers";
-import { ClipLoader } from "react-spinners";
 import dynamic from 'next/dynamic'
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false })
 
@@ -13,10 +12,9 @@ import { setupWeb3 } from "../lib/web3";
 import { merkleTree, addressInTree } from "../lib/merkleTree";
 import { buildInput, generateProof, downloadProofFiles } from "../lib/frontend/zkp";
 
-import { Wrapper, Stepper, Title, Button } from '../components/Base'
+import { Stepper, Title, Button } from '../components/Base'
 import Tooltip from '../components/Tooltip'
 import InfoRow from '../components/InfoRow'
-import SubmitButton from '../components/SubmitButton'
 import Slideover from '../components/Slideover'
 import LoadingText from '../components/LoadingText'
 import { UploadIcon } from '@heroicons/react/solid'
@@ -113,10 +111,10 @@ const Home: NextPage = () => {
         )
       );
 
-      setLoadingMessage("Downloading proving key...");
+      setLoadingMessage("Downloading proving key");
       await downloadProofFiles(filename);
     
-      setLoadingMessage("Generating proof...");
+      setLoadingMessage("Generating proof");
       const { proof, publicSignals } = await generateProof(input, filename);
 
       setProof(proof);
@@ -182,55 +180,39 @@ const Home: NextPage = () => {
         <link rel="icon" href="/heyanon.ico" />
         <script async src="snarkjs.min.js"></script>
       </Head>
-
-      <div className="flex p-5">
-        <Image src="/heyanon.png" alt="cabal" width="64" height="64" />
-        <div className="flex items-center justify-center px-5 text-lg text-white">
-          <Link href="/" className="hover:text-gray-400">
-            heyanon.xyz
-          </Link>
-        </div>
-      </div>
-
-      <div className="-mt-24 flex h-full items-center justify-center bg-heyanonred p-20 text-white">
-      <Slideover
-          open={slideoverOpen}
-          setOpen={setSlideoverOpen}
-          title={slideoverTitle}
-        >
+      <div className="flex h-full items-center justify-center bg-heyanonred p-20 text-white">
+        <Slideover
+            open={slideoverOpen}
+            setOpen={setSlideoverOpen}
+            title={slideoverTitle}
+          >
           {slideoverContent && (
             <DynamicReactJson
               src={slideoverContent}
               name={null}
               indentWidth={2}
               displayDataTypes={false}
-              displayArrayKey={false}
             />
           )}
         </Slideover>
-
+          
+        <div className="flex justify-center px-10">
+          <Image src="/logo.svg" alt="heyanon!" width="232" height="160" />
+        </div>
         <div className="items-center justify-center	self-center">
           <div className="flex justify-between">
             <Stepper>ZK Verification STEP {externalStep}/6</Stepper>
-            <div className="flex items-center justify-center px-2">
-              <span className="p-2">
-                <UploadIcon width={16} height={16} />
-              </span>
-              <Link href={`/`}>
-                <a className="text-s hover:text-gray-400">
-                  {'Upload Local Proof'}
-                </a>
-              </Link>
-            </div>
           </div>
 
-          {step < 8 && <Title> {TITLES[step]} </Title>}
+          <Title> {TITLES[step]} </Title>
 
           <div className="my-5">
             {(step === 0 || step === 1 || step === 2) && (
               <>
               <InfoRow name="Group" content={`${group}`} />
-              <InfoRow name="Merkle root" content={`${merkleTree.root}`} />
+              <InfoRow name="Merkle root" content={
+                <Tooltip text={`${merkleTree.root}`}/>
+              } />
               </>
             )}
             {(step === 1 || step === 2) && (
@@ -251,18 +233,15 @@ const Home: NextPage = () => {
             {(step === 4 && (
               <>
                 <InfoRow name="Group" content={`${group}`} />
-                <InfoRow name="Merkle root" content={`${merkleTree.root}`} />
+                <InfoRow name="Merkle root" content={
+                  <Tooltip text={`${merkleTree.root}`}/>
+                } />
                 <InfoRow name="Address" content={`${address}`} />
                 <InfoRow name="Message" content={`${msg}`} />
               </>
             ))}
             {(step === 5 && (
-              <div className="flex">
-                <div className="pr-2">
-                  <ClipLoader color={"black"} loading={true} size={20} />
-                </div>
-                <InfoRow name="Currently" content={`${loadingMessage}`} />
-              </div>
+              <LoadingText currentStage={`${loadingMessage}`}/>
             ))}
             {(step === 6 && (
               <InfoRow
