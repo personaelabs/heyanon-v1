@@ -205,7 +205,6 @@ const Home: NextPage = () => {
                 name={null}
                 indentWidth={2}
                 displayDataTypes={false}
-                displayArrayKey={false}
               />
             )}
           </Slideover>
