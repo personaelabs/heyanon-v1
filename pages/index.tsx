@@ -1,5 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import Script from "next/script";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -16,12 +18,14 @@ import {
   downloadProofFiles,
 } from "../lib/frontend/zkp";
 
-import { Stepper, Title, Button } from '../components/Base'
-import Tooltip from '../components/Tooltip'
-import InfoRow from '../components/InfoRow'
-import Slideover from '../components/Slideover'
-import LoadingText from '../components/LoadingText'
-import { UploadIcon } from '@heroicons/react/solid'
+import { Wrapper, Stepper, Title, Button } from "../components/Base";
+import Tooltip from "../components/Tooltip";
+import InfoRow from "../components/InfoRow";
+import SubmitButton from "../components/SubmitButton";
+import Slideover from "../components/Slideover";
+import LoadingText from "../components/LoadingText";
+import { UploadIcon } from "@heroicons/react/solid";
+import Header from "../components/Header";
 
 // TODO: add state for proof generating in the background!
 // NOTE: first testing with smaller, dummy proof, then test against the big guy...
@@ -178,7 +182,7 @@ const Home: NextPage = () => {
   const externalStep = getExternalStep(step);
 
   return (
-    <>
+
     <div className="h-screen">
       <Head>
         <title>heyanon!</title>
