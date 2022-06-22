@@ -16,10 +16,12 @@ import {
   downloadProofFiles,
 } from "../lib/frontend/zkp";
 
-import { Stepper, Title, Button } from "../components/Base";
-import InfoRow from "../components/InfoRow";
-import Slideover from "../components/Slideover";
-import { UploadIcon } from "@heroicons/react/solid";
+import { Stepper, Title, Button } from '../components/Base'
+import Tooltip from '../components/Tooltip'
+import InfoRow from '../components/InfoRow'
+import Slideover from '../components/Slideover'
+import LoadingText from '../components/LoadingText'
+import { UploadIcon } from '@heroicons/react/solid'
 
 // TODO: add state for proof generating in the background!
 // NOTE: first testing with smaller, dummy proof, then test against the big guy...
@@ -114,10 +116,10 @@ const Home: NextPage = () => {
         )
       );
 
-      setLoadingMessage("Downloading proving key...");
+      setLoadingMessage("Downloading proving key");
       await downloadProofFiles(filename);
 
-      setLoadingMessage("Generating proof...");
+      setLoadingMessage("Generating proof...");    
       const { proof, publicSignals } = await generateProof(input, filename);
 
       setProof(proof);
@@ -177,103 +179,82 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className="h-screen">
-        <Head>
-          <title>heyanon!</title>
-          <link rel="icon" href="/heyanon.ico" />
-          <script async src="snarkjs.min.js"></script>
-        </Head>
-
-        <div className="flex p-5">
-          <Image src="/heyanon.png" alt="cabal" width="64" height="64" />
-          <div className="flex items-center justify-center px-5 text-lg text-white">
-            <Link href="/" className="hover:text-gray-400">
-              heyanon.xyz
-            </Link>
-          </div>
-        </div>
-
-        <div className="-mt-24 flex h-full items-center justify-center bg-heyanonred p-20 text-white">
-          <Slideover
+    <div className="h-screen">
+      <Head>
+        <title>heyanon!</title>
+        <link rel="icon" href="/heyanon.ico" />
+        <script async src="snarkjs.min.js"></script>
+      </Head>
+      <div className="flex h-full items-center justify-center bg-heyanonred p-20 text-white">
+        <Slideover
             open={slideoverOpen}
             setOpen={setSlideoverOpen}
             title={slideoverTitle}
           >
-            {slideoverContent && (
-              <DynamicReactJson
-                src={slideoverContent}
-                name={null}
-                indentWidth={2}
-                displayDataTypes={false}
-              />
+          {slideoverContent && (
+            <DynamicReactJson
+              src={slideoverContent}
+              name={null}
+              indentWidth={2}
+              displayDataTypes={false}
+            />
+          )}
+        </Slideover>
+          
+        <div className="flex justify-center px-10">
+          <Image src="/logo.svg" alt="heyanon!" width="232" height="160" />
+        </div>
+        <div className="items-center justify-center	self-center">
+          <div className="flex justify-between">
+            <Stepper>ZK Verification STEP {externalStep}/6</Stepper>
+          </div>
+
+          <Title> {TITLES[step]} </Title>
+
+          <div className="my-5">
+            {(step === 0 || step === 1 || step === 2) && (
+              <>
+              <InfoRow name="Group" content={`${group}`} />
+              <InfoRow name="Merkle root" content={
+                <Tooltip text={`${merkleTree.root}`}/>
+              } />
+              </>
             )}
-          </Slideover>
-
-          <div className="items-center justify-center	self-center">
-            <div className="flex justify-between">
-              <Stepper>ZK Verification STEP {externalStep}/6</Stepper>
-              <div className="flex items-center justify-center px-2">
-                <span className="p-2">
-                  <UploadIcon width={16} height={16} />
-                </span>
-                <Link href={`/`}>
-                  <a className="text-s hover:text-gray-400">
-                    {"Upload Local Proof"}
-                  </a>
-                </Link>
+            {(step === 1 || step === 2) && (
+              <InfoRow name="Address" content={`${address}`} />
+            )}
+            {(step === 3) && (
+              <div className="">
+                <textarea
+                  rows={4}
+                  name="comment"
+                  id="comment"
+                  className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                  placeholder={'Enter tweet...'}
+                  onChange={(e) => setMsg(e.target.value)}
+                />
               </div>
-            </div>
-
-            {step < 8 && <Title> {TITLES[step]} </Title>}
-
-            <div className="my-5">
-              {(step === 0 || step === 1 || step === 2) && (
-                <>
-                  <InfoRow name="Group" content={`${group}`} />
-                  <InfoRow name="Merkle root" content={`${merkleTree.root}`} />
-                </>
-              )}
-              {(step === 1 || step === 2) && (
+            )}
+            {(step === 4 && (
+              <>
+                <InfoRow name="Group" content={`${group}`} />
+                <InfoRow name="Merkle root" content={
+                  <Tooltip text={`${merkleTree.root}`}/>
+                } />
                 <InfoRow name="Address" content={`${address}`} />
-              )}
-              {step === 3 && (
-                <div className="">
-                  <textarea
-                    rows={4}
-                    name="comment"
-                    id="comment"
-                    className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
-                    placeholder={"Enter tweet..."}
-                    onChange={(e) => setMsg(e.target.value)}
-                  />
-                </div>
-              )}
-              {step === 4 && (
-                <>
-                  <InfoRow name="Group" content={`${group}`} />
-                  <InfoRow name="Merkle root" content={`${merkleTree.root}`} />
-                  <InfoRow name="Address" content={`${address}`} />
-                  <InfoRow name="Message" content={`${msg}`} />
-                </>
-              )}
-              {step === 5 && (
-                <div className="flex">
-                  <div className="pr-2">
-                    <ClipLoader color={"black"} loading={true} size={20} />
-                  </div>
-                  <InfoRow name="Currently" content={`${loadingMessage}`} />
-                </div>
-              )}
-              {step === 6 && (
-                <InfoRow
-                  name="ZK Proof"
-                  content={
-                    <span
-                      onClick={() => openSlideOver(proof, "ZK Proof")}
-                      className="hover:cursor-pointer hover:text-terminal-green"
-                    >
-                      Click to view
-                    </span>
+                <InfoRow name="Message" content={`${msg}`} />
+              </>
+            ))}
+            {(step === 5 && (
+              <LoadingText currentStage={`${loadingMessage}`}/>
+            ))}
+            {(step === 6 && (
+              <InfoRow
+              name="ZK Proof"
+              content={
+                <span
+                  onClick={() =>
+                    openSlideOver(proof, 'ZK Proof')
                   }
                 />
               )}
