@@ -61,22 +61,6 @@ export async function generateProof(input: any, filename: string) {
   };
 }
 
-function bigintToTuple(x: bigint) {
-  let mod: bigint = 1n;
-  for (var idx = 0; idx < 64; idx++) {
-    mod = mod * 2n;
-  }
-
-  let ret: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
-
-  var x_temp: bigint = x;
-  for (var idx = 0; idx < ret.length; idx++) {
-    ret[idx] = x_temp % mod;
-    x_temp = x_temp / mod;
-  }
-  return ret;
-}
-
 function bigIntToArray(n: number, k: number, x: bigint) {
   let divisor = 1n;
   for (var idx = 0; idx < n; idx++) {
