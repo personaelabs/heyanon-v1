@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { postTweet } from "../../lib/twitter";
+import { postTweet } from "../../../lib/twitter";
 
 export default async function handler(
   req: NextApiRequest,

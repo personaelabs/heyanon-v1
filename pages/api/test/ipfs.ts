@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { postToIpfs } from "../../lib/ipfs";
+import { postToIpfs } from "../../../lib/ipfs";
 
 export default async function handler(
   req: NextApiRequest,
