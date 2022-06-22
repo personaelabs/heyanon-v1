@@ -72,7 +72,7 @@ export default async function handler(
   console.log(`Verification status: ${verified}`);
 
   // TODO: do we need error handling here?
-  const cid = await postToIpfs(JSON.stringify(proof));
+  const cid = await postToIpfs(JSON.stringify({ proof, publicSignals }));
   console.log(`Posted to ipfs: ${cid.toString()}`);
 
   if (verified) {
