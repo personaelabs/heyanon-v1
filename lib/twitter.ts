@@ -34,9 +34,18 @@ const authHeader = oauth.toHeader(
   )
 );
 
+type TwitResponse = {
+  statusCode: number;
+  body: {
+    data: {
+      id: string;
+    };
+  };
+};
+
 // NOTE: currently only works with the keys set in process.env
 async function postTweet(message: string) {
-  let resp = await got.post(endpointURL, {
+  let resp: TwitResponse = await got.post(endpointURL, {
     json: { text: message },
     responseType: "json",
     headers: {

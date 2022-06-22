@@ -1,14 +1,7 @@
 import styled from 'styled-components'
 
-export const Wrapper = styled.div`
-    background: black;
-    color: white;
-    height: 100%:
-    padding: 20px;
-`
-
 export const Stepper = styled.div`
-  background: #fce9a6;
+  background: #f2c43e;
   color: black;
   font-size: 16px;
   padding: 5px 10px;
@@ -16,7 +9,7 @@ export const Stepper = styled.div`
   margin: 0 5px;
   position: relative;
 
-  box-shadow: rgb(0, 0, 0) -5px 5px 0px -1px, #fce9a6 -5px 5px;
+  box-shadow: rgb(0, 0, 0) -5px 5px 0px -1px, #f2c43e -5px 5px;
 `
 
 export const Title = styled.h1`
