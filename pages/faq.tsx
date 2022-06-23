@@ -1,15 +1,24 @@
 import type { NextPage } from "next";
+import Image from "next/image";
+import Head from "next/head";
 import { Title } from "../components/Base";
-import Header from "../components/Header";
 
 const FAQ: NextPage = () => {
   return (
     <>
-      <div className="h-screen">
-        <Header></Header>
+      <div className="scroll-smooth">
+        <Head>
+          <title>heyanon!</title>
+          <link rel="icon" href="/heyanon.ico" />
+          <script async src="snarkjs.min.js"></script>
+        </Head>
 
-        <div className="-mt-24 flex h-full items-center justify-center bg-heyanonred p-20 text-white">
-          <div className="mt-20 items-center justify-center self-center prose max-w-prose">
+        <div className="flex h-full justify-center bg-heyanonred text-white">
+          <div className="items-center justify-center self-center prose max-w-prose">
+            <div className="flex justify-center pt-10">
+              <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
+            </div>
+
             <Title>FAQ</Title>
 
             <div className="grid">

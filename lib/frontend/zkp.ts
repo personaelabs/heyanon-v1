@@ -2,6 +2,7 @@
 // all of these variable names
 
 import { merkleTree } from "../merkleTree";
+import { vkey } from "../vkey";
 
 const localforage = require("localforage");
 const snarkjs = require("snarkjs");
@@ -53,6 +54,16 @@ export async function generateProof(input: any, filename: string) {
     proof,
     publicSignals,
   };
+}
+
+export async function verifyProof(proof: any, publicSignals: any) {
+  const proofVerified = await snarkjs.groth16.verify(
+    vkey,
+    publicSignals,
+    proof
+  );
+
+  return proofVerified;
 }
 
 function bigIntToArray(n: number, k: number, x: bigint) {

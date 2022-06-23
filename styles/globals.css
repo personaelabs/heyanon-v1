@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background: black;
+  background: #d12b38;
   font-family: "Space Mono";
   /* color: white; */
   font-size: 14px;

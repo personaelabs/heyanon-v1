@@ -21,15 +21,15 @@ import {
 import { merkleTree, addressInTree } from "../../lib/merkleTree";
 
 // TODO: update this length based on verify URL
-// tweet size minus ipfs hash length and '\nipfs()'
-const MAX_MESSAGE_LENGTH = 280 - (46 + 8);
+// tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'
+const MAX_MESSAGE_LENGTH = 280 - (46 + 21);
 
 const TITLES = [
-  "Please connect with Metamask",
-  "Change to an address in the group",
+  "Connect with Metamask",
+  "Change your address",
   "Please confirm address",
   "Enter your tweet & sign",
-  "Start generating a ZK proof",
+  "Generate a ZK proof",
   "Proof is being generated",
   "Submit proof and message",
   "Message has been posted!",
@@ -49,7 +49,7 @@ const PostMsgPage = () => {
   const [pubkey, setPubkey] = useState<string>("");
   const [loadingMessage, setLoadingMessage] = useState<string>("");
   const [slideoverOpen, setSlideoverOpen] = useState<boolean>(false);
-  const [slideoverContent, setSlideroverContent] = useState<any | null>(null);
+  const [slideoverContent, setSlideoverContent] = useState<any | null>(null);
   const [slideoverTitle, setSlideoverTitle] = useState<string>("");
 
   const [group, setGroup] = useState<string>("DAO Hack");
@@ -102,7 +102,7 @@ const PostMsgPage = () => {
       console.log(`sig: ${signature}`);
       setSig(signature);
 
-      const msgHash = ethers.utils.hashMessage(msg!);
+      const msgHash = ethers.utils.hashMessage(msg);
       const msgHashBytes = ethers.utils.arrayify(msgHash);
       console.log(`msghash: ${msgHash}`);
       setMsghash(msgHash);
@@ -169,7 +169,7 @@ const PostMsgPage = () => {
 
   const openSlideOver = (slideoverContent: any, title: string) => {
     setSlideoverTitle(title);
-    setSlideroverContent(slideoverContent);
+    setSlideoverContent(slideoverContent);
     setSlideoverOpen(true);
   };
 
@@ -201,7 +201,7 @@ const PostMsgPage = () => {
         </Slideover>
 
         <div className="flex h-full items-center justify-center bg-heyanonred text-white">
-          <div className="">
+          <div className="prose max-w-prose">
             <div className="flex justify-center py-10">
               <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
             </div>

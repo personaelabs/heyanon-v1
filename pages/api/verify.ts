@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { merkleTree } from "../../lib/merkleTree";
-
 import { postTweet } from "../../lib/backend/twitter";
 import { verifyProof } from "../../lib/backend/zkp";
 
@@ -31,13 +31,19 @@ export default async function handler(
     console.log(`Verification status: ${verified}`);
 
     // TODO: do we need error handling here?
-    const cid = await postToIpfs(JSON.stringify(proof));
+    const cid = await postToIpfs(
+      JSON.stringify({
+        proof: proof,
+        publicSignals: publicSignals,
+        message: message,
+      })
+    );
     console.log(`Posted to ipfs: ${cid.toString()}`);
 
     if (verified) {
       const tweetURL = await postTweet(`${message}
     
-proof(ipfs): ${cid.toString()}`);
+heyanon.xyz/verify/${cid.toString()}`);
       res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
     } else {
       console.log(`Failed verification for proof ${proof}`);
