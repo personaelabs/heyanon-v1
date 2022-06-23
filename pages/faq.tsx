@@ -17,9 +17,9 @@ const FAQ: NextPage = () => {
                 <strong>What is this site?</strong>
                 <div>
                   <a href="https://heyanon.xyz">heyanon </a>
-                  is a way for people who were involved in a historic moment on
-                  Ethereum to broadcast messages anonymously on Twitter.
-                  Historic moment feeds are curated by the
+                  is a way for people who did cool stuff on Ethereum to
+                  broadcast messages anonymously on Twitter. Historic moment
+                  feeds are curated by the
                   <a href="https://twitter.com/heyanonxyz"> @heyanonxyz </a>
                   account, such as the{" "}
                   <a href="https://twitter.com/DAOHackGossip">DAO hack</a>
