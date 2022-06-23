@@ -18,7 +18,7 @@ import {
   downloadProofFiles,
 } from "../lib/frontend/zkp";
 
-import { Wrapper, Stepper, Title, Button } from "../components/Base";
+import { Stepper, Title, Button } from "../components/Base";
 import Tooltip from "../components/Tooltip";
 import InfoRow from "../components/InfoRow";
 import SubmitButton from "../components/SubmitButton";
