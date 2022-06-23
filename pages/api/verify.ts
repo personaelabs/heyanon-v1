@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { postToIpfs } from "../../lib/ipfs";
+import { postToIpfs } from "../../lib/backend/ipfs";
 import { merkleTree } from "../../lib/merkleTree";
 
-import { postTweet } from "../../lib/twitter";
-import { verifyProof } from "../../lib/zkp";
+import { postTweet } from "../../lib/backend/twitter";
+import { verifyProof } from "../../lib/backend/zkp";
 
 /**
  * Verify a user's proof and send a tweet if it passes verification

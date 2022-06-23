@@ -12,16 +12,11 @@ async function downloadFromFilename(filename: string) {
   const link = loadURL + filename;
   try {
     const zkeyResp = await fetch(link, {
-      method: 'GET'
+      method: "GET",
     });
     const zkeyBuff = await zkeyResp.arrayBuffer();
-    await localforage.setItem(
-      filename,
-      zkeyBuff
-    );
-    console.log(
-      `Storage of ${filename} successful!`
-    );
+    await localforage.setItem(filename, zkeyBuff);
+    console.log(`Storage of ${filename} successful!`);
   } catch (e) {
     console.log(
       `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
@@ -30,7 +25,7 @@ async function downloadFromFilename(filename: string) {
 }
 
 export const downloadProofFiles = async function (filename: string) {
-  const zkeySuffix = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'];
+  const zkeySuffix = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
   const filePromises = [];
   for (const c of zkeySuffix) {
     const item = await localforage.getItem(`${filename}.zkey${c}`);
@@ -41,16 +36,15 @@ export const downloadProofFiles = async function (filename: string) {
     filePromises.push(downloadFromFilename(`${filename}.zkey${c}`));
   }
   await Promise.all(filePromises);
-}
+};
 
-// NOTE: assumes snarkjs.min.js is loaded
 export async function generateProof(input: any, filename: string) {
   // TODO: figure out how to generate this s.t. it passes build
   console.log("generating proof for input");
   console.log(input);
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     input,
-    `./${filename}.wasm`,
+    `../${filename}.wasm`,
     `${filename}.zkey`
   );
   console.log(`Generated proof ${JSON.stringify(proof)}`);
@@ -59,22 +53,6 @@ export async function generateProof(input: any, filename: string) {
     proof,
     publicSignals,
   };
-}
-
-function bigintToTuple(x: bigint) {
-  let mod: bigint = 1n;
-  for (var idx = 0; idx < 64; idx++) {
-    mod = mod * 2n;
-  }
-
-  let ret: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
-
-  var x_temp: bigint = x;
-  for (var idx = 0; idx < ret.length; idx++) {
-    ret[idx] = x_temp % mod;
-    x_temp = x_temp / mod;
-  }
-  return ret;
 }
 
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -92,7 +70,7 @@ function bigIntToArray(n: number, k: number, x: bigint) {
   return ret;
 }
 
-// NOTE: taken from generation code in dizkus-circuits tests
+// taken from generation code in dizkus-circuits tests
 function pubkeyToXYArrays(pk: string) {
   const XArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(4, 4 + 64))).map(
     (el) => el.toString()
@@ -104,7 +82,7 @@ function pubkeyToXYArrays(pk: string) {
   return [XArr, YArr];
 }
 
-// NOTE: taken from generation code in dizkus-circuits tests
+// taken from generation code in dizkus-circuits tests
 function sigToRSArrays(sig: string) {
   const rArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(2, 2 + 64))).map(
     (el) => el.toString()
@@ -128,11 +106,9 @@ export function buildInput(
     root: merkleTree.root,
     branch: merkleTree.addressToBranch[parseInt(address)],
     branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
-
-    r,
-    s,
+    r: r,
+    s: s,
     msghash: bigIntToArray(64, 4, BigInt(msghash)),
-
     pubkey: pubkeyToXYArrays(pubkey),
   };
 }
