@@ -12,16 +12,11 @@ async function downloadFromFilename(filename: string) {
   const link = loadURL + filename;
   try {
     const zkeyResp = await fetch(link, {
-      method: 'GET'
+      method: "GET",
     });
     const zkeyBuff = await zkeyResp.arrayBuffer();
-    await localforage.setItem(
-      filename,
-      zkeyBuff
-    );
-    console.log(
-      `Storage of ${filename} successful!`
-    );
+    await localforage.setItem(filename, zkeyBuff);
+    console.log(`Storage of ${filename} successful!`);
   } catch (e) {
     console.log(
       `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
@@ -30,7 +25,7 @@ async function downloadFromFilename(filename: string) {
 }
 
 export const downloadProofFiles = async function (filename: string) {
-  const zkeySuffix = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'];
+  const zkeySuffix = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
   const filePromises = [];
   for (const c of zkeySuffix) {
     const item = await localforage.getItem(`${filename}.zkey${c}`);
@@ -41,7 +36,7 @@ export const downloadProofFiles = async function (filename: string) {
     filePromises.push(downloadFromFilename(`${filename}.zkey${c}`));
   }
   await Promise.all(filePromises);
-}
+};
 
 // NOTE: assumes snarkjs.min.js is loaded
 export async function generateProof(input: any, filename: string) {
@@ -59,22 +54,6 @@ export async function generateProof(input: any, filename: string) {
     proof,
     publicSignals,
   };
-}
-
-function bigintToTuple(x: bigint) {
-  let mod: bigint = 1n;
-  for (var idx = 0; idx < 64; idx++) {
-    mod = mod * 2n;
-  }
-
-  let ret: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
-
-  var x_temp: bigint = x;
-  for (var idx = 0; idx < ret.length; idx++) {
-    ret[idx] = x_temp % mod;
-    x_temp = x_temp / mod;
-  }
-  return ret;
 }
 
 function bigIntToArray(n: number, k: number, x: bigint) {
