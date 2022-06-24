@@ -69,16 +69,16 @@ export default async function handler(
   const verified = await verifyProof(proof, publicSignals);
   console.log(`Verification status: ${verified}`);
 
-  const cid = await postToIpfs(
-    JSON.stringify({
-      proof: proof,
-      publicSignals: publicSignals,
-      message: msg,
-    })
-  );
-  console.log(`Posted to ipfs: ${cid.toString()}`);
-
   if (verified) {
+    const cid = await postToIpfs(
+      JSON.stringify({
+        proof: proof,
+        publicSignals: publicSignals,
+        message: msg,
+      })
+    );
+    console.log(`Posted to ipfs: ${cid.toString()}`);
+
     const tweetURL = await postTweet(`${msg}
   
 heyanon.xyz/verify/${cid.toString()}`);
