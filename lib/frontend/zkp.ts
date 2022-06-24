@@ -115,8 +115,8 @@ export function buildInput(
 
   return {
     root: merkleTree.root,
-    branch: merkleTree.addressToBranch[parseInt(address)],
-    branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
+    pathElements: merkleTree.addressToBranch[parseInt(address)],
+    pathIndices: merkleTree.addressToBranchIndices[parseInt(address)],
     r: r,
     s: s,
     msghash: bigIntToArray(64, 4, BigInt(msghash)),
