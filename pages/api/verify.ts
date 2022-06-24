@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { postToIpfs } from "../../lib/ipfs";
-import { merkleTree } from "../../lib/merkleTree";
 
-import { postTweet } from "../../lib/twitter";
-import { verifyProof } from "../../lib/zkp";
+import { postToIpfs } from "../../lib/backend/ipfs";
+import { merkleTree } from "../../lib/merkleTree";
+import { postTweet } from "../../lib/backend/twitter";
+import { verifyProof } from "../../lib/backend/zkp";
 
 // NOTE: this also exists in lib/frontend/zkp.ts
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -38,13 +38,11 @@ export default async function handler(
   }
   console.log(`Received request: ${JSON.stringify(body)}`);
   const proof = body.proof;
-
   const publicSignals: string[] = body.publicSignals;
-  const merkleRoot = BigInt(publicSignals[0]);
-
-  const msgHashArray = publicSignals.slice(1).map(BigInt);
-
   const msg = body.message;
+
+  const merkleRoot = BigInt(publicSignals[0]);
+  const msgHashArray = publicSignals.slice(1).map(BigInt);
   const expectedMsgHashArray = bigIntToArray(
     64,
     4,
@@ -71,14 +69,19 @@ export default async function handler(
   const verified = await verifyProof(proof, publicSignals);
   console.log(`Verification status: ${verified}`);
 
-  // TODO: do we need error handling here?
-  const cid = await postToIpfs(JSON.stringify({ proof, publicSignals }));
-  console.log(`Posted to ipfs: ${cid.toString()}`);
-
   if (verified) {
-    const tweetURL = await postTweet(`${msg}
+    const cid = await postToIpfs(
+      JSON.stringify({
+        proof: proof,
+        publicSignals: publicSignals,
+        message: msg,
+      })
+    );
+    console.log(`Posted to ipfs: ${cid.toString()}`);
 
-    proof(ipfs): ${cid.toString()}`);
+    const tweetURL = await postTweet(`${msg}
+  
+heyanon.xyz/verify/${cid.toString()}`);
     res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
     return;
   }

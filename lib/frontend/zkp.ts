@@ -2,6 +2,7 @@
 // all of these variable names
 
 import { merkleTree } from "../merkleTree";
+import { vkey } from "../vkey";
 
 const localforage = require("localforage");
 const snarkjs = require("snarkjs");
@@ -38,14 +39,13 @@ export const downloadProofFiles = async function (filename: string) {
   await Promise.all(filePromises);
 };
 
-// NOTE: assumes snarkjs.min.js is loaded
 export async function generateProof(input: any, filename: string) {
   // TODO: figure out how to generate this s.t. it passes build
   console.log("generating proof for input");
   console.log(input);
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     input,
-    `./${filename}.wasm`,
+    `../${filename}.wasm`,
     `${filename}.zkey`
   );
   console.log(`Generated proof ${JSON.stringify(proof)}`);
@@ -54,6 +54,16 @@ export async function generateProof(input: any, filename: string) {
     proof,
     publicSignals,
   };
+}
+
+export async function verifyProof(proof: any, publicSignals: any) {
+  const proofVerified = await snarkjs.groth16.verify(
+    vkey,
+    publicSignals,
+    proof
+  );
+
+  return proofVerified;
 }
 
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -71,7 +81,7 @@ function bigIntToArray(n: number, k: number, x: bigint) {
   return ret;
 }
 
-// NOTE: taken from generation code in dizkus-circuits tests
+// taken from generation code in dizkus-circuits tests
 function pubkeyToXYArrays(pk: string) {
   const XArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(4, 4 + 64))).map(
     (el) => el.toString()
@@ -83,7 +93,7 @@ function pubkeyToXYArrays(pk: string) {
   return [XArr, YArr];
 }
 
-// NOTE: taken from generation code in dizkus-circuits tests
+// taken from generation code in dizkus-circuits tests
 function sigToRSArrays(sig: string) {
   const rArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(2, 2 + 64))).map(
     (el) => el.toString()
@@ -107,11 +117,9 @@ export function buildInput(
     root: merkleTree.root,
     branch: merkleTree.addressToBranch[parseInt(address)],
     branch_side: merkleTree.addressToBranchIndices[parseInt(address)],
-
-    r,
-    s,
+    r: r,
+    s: s,
     msghash: bigIntToArray(64, 4, BigInt(msghash)),
-
     pubkey: pubkeyToXYArrays(pubkey),
   };
 }
