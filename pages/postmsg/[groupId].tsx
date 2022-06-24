@@ -125,7 +125,7 @@ const PostMsgPage = () => {
   };
 
   const genProof = () => {
-    let filename = "group_message_64_4_7";
+    let filename = "dizkus_64_4_30";
 
     const genProofAsync = async () => {
       const input = buildInput(address, pubkey, msghash, sig);
