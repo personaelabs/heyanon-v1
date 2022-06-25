@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 import { Stepper, Title, Button } from "../../components/Base";
@@ -18,72 +18,70 @@ import {
   generateProof,
   downloadProofFiles,
 } from "../../lib/frontend/zkp";
-import { merkleTree, addressInTree } from "../../lib/merkleTree";
+import { MerkleTree } from "../../lib/merkleTree";
 
 // TODO: update this length based on verify URL
 // tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'
 const MAX_MESSAGE_LENGTH = 280 - (46 + 21);
 
-const TITLES = [
-  "Connect with Metamask",
-  "Change your address",
-  "Please confirm address",
-  "Enter your tweet & sign",
-  "Generate a ZK proof",
-  "Proof is being generated",
-  "Submit proof and message",
-  "Message has been posted!",
-];
+enum Stage {
+  CONNECTING = "Retreiving group",
+  INVALID = "Invalid group :(",
+  WALLET = "Connect with Metamask",
+  NEWADDRESS = "Choose a valid address",
+  TWEET = "Enter your tweet & sign",
+  GENERATE = "Generate a ZK proof",
+  INPROGRESS = "Proof is being generated",
+  SUBMIT = "Submit proof and message",
+  SUCCESS = "Message has been posted!",
+}
 
 const PostMsgPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
 
+  const [stage, setStage] = useState<Stage>(Stage.CONNECTING);
+  const [merkleTree, setMerkleTree] = useState<MerkleTree>();
+  const [root, setRoot] = useState<string>("");
+  const [groupName, setGroupName] = useState<string>("");
+
   const [signer, setSigner] = useState<any | null>(null);
   const [address, setAddress] = useState<string>("");
-  const [confirmAddress, setConfirmAddress] = useState<boolean>(false);
 
   const [msg, setMsg] = useState<string>("");
   const [sig, setSig] = useState<string>("");
   const [msghash, setMsghash] = useState<string>("");
   const [pubkey, setPubkey] = useState<string>("");
+
   const [loadingMessage, setLoadingMessage] = useState<string>("");
+  const [proof, setProof] = useState(null);
+  const [publicSignals, setPublicSignals] = useState(null);
+
   const [slideoverOpen, setSlideoverOpen] = useState<boolean>(false);
   const [slideoverContent, setSlideoverContent] = useState<any | null>(null);
   const [slideoverTitle, setSlideoverTitle] = useState<string>("");
 
-  const [group, setGroup] = useState<string>("DAO Hack");
-  const [proof, setProof] = useState(null);
-  const [publicSignals, setPublicSignals] = useState(null);
-
   const [proofIpfs, setProofIpfs] = useState(null);
   const [tweetLink, setTweetLink] = useState(null);
 
-  const getStep = () => {
-    if (address.length === 0) return 0;
-
-    if (address.length !== 0 && !addressInTree(address)) return 1;
-
-    if (!confirmAddress && address.length !== 0 && addressInTree(address))
-      return 2;
-
-    if (msg.length === 0 || sig.length === 0) return 3;
-
-    if (!proof || !publicSignals) {
-      if (loadingMessage.length === 0) return 4;
-
-      return 5;
+  useEffect(() => {
+    async function getMerkleTree() {
+      if (!groupId) {
+        return;
+      }
+      const resp = await fetch(`/api/trees/${groupId}`);
+      const respData: MerkleTree = await resp.json();
+      if (!resp.ok) {
+        setStage(Stage.INVALID);
+        return;
+      }
+      setMerkleTree(respData);
+      setGroupName(respData.groupName);
+      setRoot(respData.root);
+      setStage(Stage.WALLET);
     }
-
-    if (!proofIpfs) return 6;
-
-    return 7;
-  };
-
-  const getExternalStep = (step: number) => {
-    if (step === 0 || step === 1) return 0;
-    else return step - 1;
-  };
+    getMerkleTree();
+  }, [groupId]);
 
   const connectToMetamask = () => {
     const connectToMetamaskAsync = async () => {
@@ -92,6 +90,12 @@ const PostMsgPage = () => {
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
       setAddress(addr);
+
+      if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
+        setStage(Stage.NEWADDRESS);
+      } else {
+        setStage(Stage.TWEET);
+      }
     };
     connectToMetamaskAsync();
   };
@@ -111,13 +115,15 @@ const PostMsgPage = () => {
       console.log(`pk: ${pubkey}`);
       setPubkey(pubkey);
 
-      // NOTE: this check not *strictly* necessary, but no harm
       const recoveredAddress = ethers.utils.computeAddress(pubkey);
       const actualAddress = await signer.getAddress();
       if (recoveredAddress != actualAddress) {
         console.log(
           `Address mismatch on recovery! Recovered ${recoveredAddress} but signed with ${actualAddress}`
         );
+        setStage(Stage.NEWADDRESS);
+      } else {
+        setStage(Stage.GENERATE);
       }
     };
 
@@ -128,7 +134,17 @@ const PostMsgPage = () => {
     let filename = "dizkus_64_4_30";
 
     const genProofAsync = async () => {
-      const input = buildInput(address, pubkey, msghash, sig);
+      if (!merkleTree) {
+        return;
+      }
+
+      const input = buildInput(
+        merkleTree,
+        BigInt(address).toString(),
+        pubkey,
+        msghash,
+        sig
+      );
       console.log(
         JSON.stringify(
           input,
@@ -136,6 +152,8 @@ const PostMsgPage = () => {
           2
         )
       );
+
+      setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Downloading proving key");
       await downloadProofFiles(filename);
@@ -145,6 +163,8 @@ const PostMsgPage = () => {
 
       setProof(proof);
       setPublicSignals(publicSignals);
+
+      setStage(Stage.SUBMIT);
     };
 
     genProofAsync();
@@ -160,11 +180,13 @@ const PostMsgPage = () => {
         proof,
         publicSignals,
         message: msg,
+        groupId: groupId,
       }),
     });
     const respData = await resp.json();
     setProofIpfs(respData["ipfsHash"]);
     setTweetLink(respData["tweetURL"]);
+    setStage(Stage.SUCCESS);
   };
 
   const openSlideOver = (slideoverContent: any, title: string) => {
@@ -172,9 +194,6 @@ const PostMsgPage = () => {
     setSlideoverContent(slideoverContent);
     setSlideoverOpen(true);
   };
-
-  const step = getStep();
-  const externalStep = getExternalStep(step);
 
   return (
     <>
@@ -205,26 +224,27 @@ const PostMsgPage = () => {
             <div className="flex justify-center py-10">
               <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
             </div>
+
             <div className="flex justify-between">
-              <Stepper>ZK Proof Generation Step {externalStep}/6</Stepper>
+              <Stepper>ZK Proof Generation</Stepper>
             </div>
 
-            <Title> {TITLES[step]} </Title>
+            <Title> {stage} </Title>
 
             <div className="my-5">
-              {(step === 0 || step === 1 || step === 2) && (
+              {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
                 <>
-                  <InfoRow name="Group" content={`${group}`} />
+                  <InfoRow name="Group" content={`${groupName}`} />
                   <InfoRow
                     name="Merkle root"
-                    content={<Tooltip text={`${merkleTree.root}`} />}
+                    content={<Tooltip text={`${root}`} />}
                   />
                 </>
               )}
-              {(step === 1 || step === 2) && (
-                <InfoRow name="Address" content={`${address}`} />
+              {stage === Stage.NEWADDRESS && (
+                <InfoRow name="Connected address" content={`${address}`} />
               )}
-              {step === 3 && (
+              {stage === Stage.TWEET && (
                 <div className="">
                   <textarea
                     rows={4}
@@ -236,19 +256,21 @@ const PostMsgPage = () => {
                   />
                 </div>
               )}
-              {step === 4 && (
+              {stage === Stage.GENERATE && (
                 <>
-                  <InfoRow name="Group" content={`${group}`} />
+                  <InfoRow name="Group" content={`${groupName}`} />
                   <InfoRow
                     name="Merkle root"
-                    content={<Tooltip text={`${merkleTree.root}`} />}
+                    content={<Tooltip text={`${root}`} />}
                   />
                   <InfoRow name="Address" content={`${address}`} />
                   <InfoRow name="Message" content={`${msg}`} />
                 </>
               )}
-              {step === 5 && <LoadingText currentStage={`${loadingMessage}`} />}
-              {step === 6 && (
+              {stage === Stage.INPROGRESS && (
+                <LoadingText currentStage={`${loadingMessage}`} />
+              )}
+              {stage === Stage.SUBMIT && (
                 <InfoRow
                   name="ZK Proof"
                   content={
@@ -261,7 +283,7 @@ const PostMsgPage = () => {
                   }
                 />
               )}
-              {step === 7 && (
+              {stage === Stage.SUCCESS && (
                 <>
                   <InfoRow
                     name="Link to tweet"
@@ -273,15 +295,10 @@ const PostMsgPage = () => {
             </div>
 
             <div className="py-2">
-              {(step === 0 || step === 1) && (
+              {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
                 <Button onClick={connectToMetamask}>Connect Metamask</Button>
               )}
-              {step === 2 && (
-                <Button onClick={() => setConfirmAddress(true)}>
-                  Confirm Address
-                </Button>
-              )}
-              {step === 3 && (
+              {stage === Stage.TWEET && (
                 <Button
                   disabled={
                     msg === null ||
@@ -296,8 +313,12 @@ const PostMsgPage = () => {
                     : "Sign"}
                 </Button>
               )}
-              {step === 4 && <Button onClick={genProof}>Generate</Button>}
-              {step === 6 && <Button onClick={submit}>Submit</Button>}
+              {stage === Stage.GENERATE && (
+                <Button onClick={genProof}>Generate</Button>
+              )}
+              {stage === Stage.SUBMIT && (
+                <Button onClick={submit}>Submit</Button>
+              )}
             </div>
           </div>
         </div>

@@ -1,10 +1,12 @@
-import { ethers } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { ethers } from "ethers";
+import fs from "fs";
+import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
-import { merkleTree } from "../../lib/merkleTree";
 import { postTweet } from "../../lib/backend/twitter";
 import { verifyProof } from "../../lib/backend/zkp";
+import { MerkleTree } from "../../lib/merkleTree";
 
 // NOTE: this also exists in lib/frontend/zkp.ts
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -40,8 +42,9 @@ export default async function handler(
   const proof = body.proof;
   const publicSignals: string[] = body.publicSignals;
   const msg = body.message;
+  const groupId = body.groupId;
 
-  const merkleRoot = BigInt(publicSignals[0]);
+  const merkleRoot = publicSignals[0];
   const msgHashArray = publicSignals.slice(1).map(BigInt);
   const expectedMsgHashArray = bigIntToArray(
     64,
@@ -49,8 +52,15 @@ export default async function handler(
     BigInt(ethers.utils.hashMessage(msg))
   );
 
-  if (merkleRoot !== merkleTree.root) {
-    console.log(`Expected merkle root ${merkleTree.root} got ${merkleRoot}`);
+  const filename = `${groupId}.json`;
+  const filePath = path.resolve("./pages/api/trees", filename);
+  const buffer = fs.readFileSync(filePath);
+  const groupMerkleTree: MerkleTree = JSON.parse(buffer.toString());
+
+  if (merkleRoot !== groupMerkleTree.root) {
+    console.log(
+      `Expected merkle root ${groupMerkleTree.root} got ${merkleRoot}`
+    );
     res.status(400).json("incorrect merkle root used");
     return;
   }
@@ -75,13 +85,18 @@ export default async function handler(
         proof: proof,
         publicSignals: publicSignals,
         message: msg,
+        groupName: groupMerkleTree.groupName,
       })
     );
     console.log(`Posted to ipfs: ${cid.toString()}`);
 
-    const tweetURL = await postTweet(`${msg}
+    const tweetURL = await postTweet(
+      `${msg}
   
-heyanon.xyz/verify/${cid.toString()}`);
+heyanon.xyz/verify/${cid.toString()}`,
+      groupMerkleTree.secretIndex,
+      groupMerkleTree.twitterAccount
+    );
     res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
     return;
   }

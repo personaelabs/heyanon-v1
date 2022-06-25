@@ -1,7 +1,7 @@
 // TODO: we can set the circuit we're using in a variable and have that propagate down to
 // all of these variable names
 
-import { merkleTree } from "../merkleTree";
+import { MerkleTree } from "../merkleTree";
 import { vkey } from "../vkey";
 
 const localforage = require("localforage");
@@ -106,6 +106,7 @@ function sigToRSArrays(sig: string) {
 }
 
 export function buildInput(
+  merkleTree: MerkleTree,
   address: string,
   pubkey: string,
   msghash: string,
@@ -115,8 +116,8 @@ export function buildInput(
 
   return {
     root: merkleTree.root,
-    pathElements: merkleTree.addressToBranch[parseInt(address)],
-    pathIndices: merkleTree.addressToBranchIndices[parseInt(address)],
+    pathElements: merkleTree.leafToPathElements[address],
+    pathIndices: merkleTree.leafToPathIndices[address],
     r: r,
     s: s,
     msghash: bigIntToArray(64, 4, BigInt(msghash)),

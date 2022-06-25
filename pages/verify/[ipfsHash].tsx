@@ -28,6 +28,7 @@ const VerifyPage = () => {
   const [publicSignals, setPublicSignals] = useState(null);
   const [message, setMessage] = useState<string>("");
   const [root, setRoot] = useState<string>("");
+  const [groupName, setGroupName] = useState<string>("");
 
   const [slideoverOpen, setSlideoverOpen] = useState<boolean>(false);
   const [slideoverContent, setSlideoverContent] = useState<any | null>(null);
@@ -42,7 +43,8 @@ const VerifyPage = () => {
         !resp.ok ||
         !respData.proof ||
         !respData.publicSignals ||
-        !respData.message
+        !respData.message ||
+        !respData.groupName
       ) {
         setStage(FileStage.INVALID);
         return;
@@ -51,6 +53,7 @@ const VerifyPage = () => {
         setProof(respData.proof);
         setPublicSignals(respData.publicSignals);
         setMessage(respData.message);
+        setGroupName(respData.groupName);
         setRoot(respData.publicSignals[0]);
       }
     }
@@ -120,6 +123,7 @@ const VerifyPage = () => {
             {stage === FileStage.VALID && (
               <>
                 <InfoRow name="Message" content={message} />
+                <InfoRow name="Group" content={groupName} />
                 <InfoRow name="Root" content={<Tooltip text={root} />} />
                 <InfoRow
                   name="ZK Proof"
