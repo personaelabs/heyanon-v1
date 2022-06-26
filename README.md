@@ -7,10 +7,8 @@ TWIT_ACCESS_TOKEN=...
 TWIT_ACCESS_SECRET=...
 ```
 
-install ipfs and set up an ipfs node `ipfs daemon`
-
 and then run `npm run dev`
 
-Circuits are [here](https://github.com/lsankar4033/dizkus-circuits)
+Circuits are [here](https://github.com/dizkus/circuits)
 
-Data collection is [here](https://github.com/lsankar4033/dizkus-data)
+Data generation is [here](https://github.com/dizkus/data)
