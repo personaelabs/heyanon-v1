@@ -3732,7 +3732,7 @@ ipfs-core-utils@^0.15.0, ipfs-core-utils@^0.15.1:
     blob-to-it "^1.0.1"
     browser-readablestream-to-it "^1.0.1"
     err-code "^3.0.1"
-    ipfs-core-types "^0.11.0"
+    ipfs-core-types "^0.11.1"
     ipfs-unixfs "^6.0.9"
     ipfs-utils "^9.0.6"
     it-all "^1.0.4"

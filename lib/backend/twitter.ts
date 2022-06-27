@@ -2,37 +2,10 @@ import got from "got";
 import crypto from "crypto";
 import OAuth from "oauth-1.0a";
 
-const consumerKey = process.env.TWIT_CONSUMER_KEY!;
-const consumerSecret = process.env.TWIT_CONSUMER_SECRET!;
-const accessToken = process.env.TWIT_ACCESS_TOKEN!;
-const accessSecret = process.env.TWIT_ACCESS_SECRET!;
-
-const twitterAccount = "DAOHackGossip";
-
-const oauth = new OAuth({
-  consumer: {
-    key: consumerKey,
-    secret: consumerSecret,
-  },
-  signature_method: "HMAC-SHA1",
-  hash_function: (baseString, key) =>
-    crypto.createHmac("sha1", key).update(baseString).digest("base64"),
-});
-
-const endpointURL = `https://api.twitter.com/2/tweets`;
-
-const authHeader = oauth.toHeader(
-  oauth.authorize(
-    {
-      url: endpointURL,
-      method: "POST",
-    },
-    {
-      key: accessToken,
-      secret: accessSecret,
-    }
-  )
-);
+const consumerKeys = process.env.TWIT_CONSUMER_KEY!.split(" ");
+const consumerSecrets = process.env.TWIT_CONSUMER_SECRET!.split(" ");
+const accessTokens = process.env.TWIT_ACCESS_TOKEN!.split(" ");
+const accessSecrets = process.env.TWIT_ACCESS_SECRET!.split(" ");
 
 type TwitResponse = {
   statusCode: number;
@@ -43,8 +16,36 @@ type TwitResponse = {
   };
 };
 
-// NOTE: currently only works with the keys set in process.env
-async function postTweet(message: string) {
+async function postTweet(
+  message: string,
+  secretIndex: number,
+  twitterAccount: string
+) {
+  const oauth = new OAuth({
+    consumer: {
+      key: consumerKeys[secretIndex],
+      secret: consumerSecrets[secretIndex],
+    },
+    signature_method: "HMAC-SHA1",
+    hash_function: (baseString, key) =>
+      crypto.createHmac("sha1", key).update(baseString).digest("base64"),
+  });
+
+  const endpointURL = `https://api.twitter.com/2/tweets`;
+
+  const authHeader = oauth.toHeader(
+    oauth.authorize(
+      {
+        url: endpointURL,
+        method: "POST",
+      },
+      {
+        key: accessTokens[secretIndex],
+        secret: accessSecrets[secretIndex],
+      }
+    )
+  );
+
   let resp: TwitResponse = await got.post(endpointURL, {
     json: { text: message },
     responseType: "json",
