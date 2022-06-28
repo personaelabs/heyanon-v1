@@ -39,4 +39,3 @@ yarn.lock
 
 # snarkjs browser payload
 *.zkey
-*.wasm
