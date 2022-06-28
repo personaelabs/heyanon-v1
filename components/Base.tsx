@@ -14,12 +14,13 @@ export const Stepper = styled.div`
 
 export const Title = styled.h1`
   font-size: 40px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 20px 0px;
 `;
 
 export const Button = styled.button`
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 700;
   padding: 10px 15px;
   background: #fff;
   color: black;

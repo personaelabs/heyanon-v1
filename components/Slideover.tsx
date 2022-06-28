@@ -1,22 +1,22 @@
 /* This example requires Tailwind CSS v2.0+ */
-import { Dispatch } from 'react'
-import { Fragment, SetStateAction, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { XIcon } from '@heroicons/react/outline'
+import { Dispatch } from "react";
+import { Fragment, SetStateAction, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { XIcon } from "@heroicons/react/outline";
 
 type Props = {
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
-  title?: string
-  children?: JSX.Element
-}
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  title?: string;
+  children?: JSX.Element;
+};
 
 export default function SlideOver({ open, setOpen, title, children }: Props) {
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 overflow-hidden"
+        className="bg-white fixed inset-0 overflow-hidden"
         onClose={setOpen}
       >
         <div className="absolute inset-0 overflow-hidden">
@@ -33,17 +33,20 @@ export default function SlideOver({ open, setOpen, title, children }: Props) {
               leaveTo="translate-x-full"
             >
               <div className="pointer-events-auto w-screen max-w-md">
-                <div className="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+                <div
+                  className="flex h-full flex-col overflow-y-scroll py-6 shadow-xl"
+                  style={{ background: "white" }}
+                >
                   <div className="px-4 sm:px-6">
                     <div className="flex items-start justify-between">
                       <Dialog.Title className="text-lg font-medium text-gray-900">
-                        {' '}
-                        {title}{' '}
+                        {" "}
+                        {title}{" "}
                       </Dialog.Title>
                       <div className="ml-3 flex h-7 items-center">
                         <button
                           type="button"
-                          className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          className="rounded-mdtext-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                           onClick={() => setOpen(false)}
                         >
                           <span className="sr-only">Close panel</span>
@@ -71,5 +74,5 @@ export default function SlideOver({ open, setOpen, title, children }: Props) {
         </div>
       </Dialog>
     </Transition.Root>
-  )
+  );
 }
