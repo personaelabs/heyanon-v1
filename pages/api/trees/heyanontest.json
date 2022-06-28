@@ -138,5 +138,5 @@
   "description": "A merkle tree of one address of Vivek's and one of Lakshman's",
   "whyUseful": "To test our user flow and API endpoints lol",
   "howGenerated": "dizkus-data",
-  "secretIndex": 1
+  "secretIndex": 0
 }
