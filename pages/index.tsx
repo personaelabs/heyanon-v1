@@ -34,9 +34,9 @@ const Home: NextPage = () => {
                   <a href="https://twitter.com/heyanonxyz"> @heyanonxyz </a>
                   account, such as the{" "}
                   <a href="https://twitter.com/DAOHackGossip">DAO hack</a> feed.
-                  Anyone whose participation in the moment can be verified
-                  on-chain can post to the feed. The magic is that you don’t
-                  need to reveal your address when you do.
+                  Anyone whose participation in a group or historical moment can
+                  be verified and then post to the feed. The magic is that you
+                  don’t need to reveal your address when you do.
                   <br />
                   <br />
                   <em>Not even to the site admins.</em>
@@ -53,16 +53,15 @@ const Home: NextPage = () => {
                     {" "}
                     zero-knowledge proof{" "}
                   </a>
-                  that you were involved with a certain event on-chain. This
-                  proof hides all information about your address. The proof is
-                  all that is sent to the{" "}
+                  that you are in a specific group or involved with a certain
+                  historical event on-chain. This proof hides all information
+                  about your address. The proof is all that is sent to the{" "}
                   <a href="https://heyanon.xyz">heyanon</a> backend for
                   verification. Upon verification, the proof is posted to{" "}
                   <a href="https://ipfs.io/">ipfs</a> and your message is sent
                   via the specified event feed bot. The message has with it a
-                  verify link that twitter readers can use to verify the proof
-                  located on ipfs themselves. For more, check out our circuits
-                  and code at
+                  verify link that twitter readers can use to inspect the proof
+                  themselves. For more, check out our circuits and code at
                   <a href="https://github.com/dizkus"> github</a>.
                 </div>
               </div>
@@ -98,6 +97,10 @@ const Home: NextPage = () => {
                   updates and new message feeds. Join our{" "}
                   <a href="https://discord.gg/4J3XzZJf">discord</a> for misc.
                   discussion.
+                  <br />
+                  <br />
+                  With &lt;3, the heyanon team. Powered by{" "}
+                  <a href="https://0xparc.org/"> 0xPARC</a>.
                 </div>
               </div>
             </div>
