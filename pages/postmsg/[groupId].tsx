@@ -20,9 +20,8 @@ import {
 } from "../../lib/frontend/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 
-// TODO: update this length based on verify URL
 // tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'
-const MAX_MESSAGE_LENGTH = 280 - (46 + 21);
+const MAX_MESSAGE_LENGTH = 280 - 73;
 
 enum Stage {
   CONNECTING = "Retreiving group",
