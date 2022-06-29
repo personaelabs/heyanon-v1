@@ -23,25 +23,30 @@ const Home: NextPage = () => {
 
             <div className="grid">
               <div className="mb-8">
-                <strong>What is this site?</strong>
+                <strong>
+                  <u>What is this site?</u>
+                </strong>
                 <div>
                   <a href="https://heyanon.xyz">heyanon </a>
-                  is a way for people who did cool stuff on Ethereum to
-                  broadcast messages anonymously on Twitter. Historic moment
-                  feeds are curated by the
+                  is a way for people <i>who did cool stuff</i> or are{" "}
+                  <i>in cool groups</i> on Ethereum to broadcast messages
+                  anonymously on Twitter. These feeds are curated by the
                   <a href="https://twitter.com/heyanonxyz"> @heyanonxyz </a>
                   account, such as the{" "}
-                  <a href="https://twitter.com/DAOHackGossip">DAO hack</a>
-                  feed. Anyone whose participation in the moment can be verified
+                  <a href="https://twitter.com/DAOHackGossip">DAO hack</a> feed.
+                  Anyone whose participation in the moment can be verified
                   on-chain can post to the feed. The magic is that you don’t
                   need to reveal your address when you do.
+                  <br />
                   <br />
                   <em>Not even to the site admins.</em>
                 </div>
               </div>
 
               <div className="mb-8">
-                <strong>How does it work?</strong>
+                <strong>
+                  <u>How does it work?</u>
+                </strong>
                 <div>
                   When you send a message with heyanon, you generate a
                   <a href="https://en.wikipedia.org/wiki/Zero-knowledge_proof">
@@ -52,17 +57,20 @@ const Home: NextPage = () => {
                   proof hides all information about your address. The proof is
                   all that is sent to the{" "}
                   <a href="https://heyanon.xyz">heyanon</a> backend for
-                  verification. Upon verification, the proof is posted to
-                  <a href="https://ipfs.io/">ipfs</a>
-                  and your message is sent via the specified event feed bot. The
-                  message has with it a verify link twitter readers can use to
-                  the proof located on ipfs themselves. For more, check out our
+                  verification. Upon verification, the proof is posted to{" "}
+                  <a href="https://ipfs.io/">ipfs</a> and your message is sent
+                  via the specified event feed bot. The message has with it a
+                  verify link that twitter readers can use to verify the proof
+                  located on ipfs themselves. For more, check out our circuits
+                  and code at
                   <a href="https://github.com/dizkus"> github</a>.
                 </div>
               </div>
 
               <div className="mb-8">
-                <strong>Why does it only work on Google Chrome?</strong>
+                <strong>
+                  <u>Why does it only work on Google Chrome?</u>
+                </strong>
                 <div>
                   The zero-knowledge proofs we’re working with are *really* big.
                   Perhaps the biggest proofs anyone’s tried to create on an
@@ -70,11 +78,20 @@ const Home: NextPage = () => {
                   with heyanon and have only been successful with Google Chrome
                   so far. We’re working on making things work in other web
                   browsers and mobile wallets though!
+                  <br />
+                  <br />
+                  We could run these proofs on another machine that is more
+                  powerful. However, that would come at the cost of user
+                  privacy; the server computing the proofs would need to know
+                  your address and thus could dox you. Doing everything on your
+                  local machine avoids this risk!
                 </div>
               </div>
 
               <div className="mb-8">
-                <strong>How can you contribute or follow along?</strong>
+                <strong>
+                  <u>How can you contribute or follow along?</u>
+                </strong>
                 <div>
                   Follow{" "}
                   <a href="https://twitter.com/heyanonxyz">@heyanonxyz</a> for
