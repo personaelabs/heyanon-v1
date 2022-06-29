@@ -18,7 +18,7 @@ import {
   generateProof,
   downloadProofFiles,
 } from "../../lib/frontend/zkp";
-import { MerkleTree } from "../../lib/merkleTree";
+import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
 // tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'
 const MAX_MESSAGE_LENGTH = 280 - 73;
@@ -68,16 +68,25 @@ const PostMsgPage = () => {
       if (!groupId) {
         return;
       }
-      const resp = await fetch(`/api/trees/${groupId}`);
-      const respData: MerkleTree = await resp.json();
-      if (!resp.ok) {
-        setStage(Stage.INVALID);
-        return;
+      if (groupId === "daohack") {
+        treeFromCloudfront("daohack.json").then((tree) => {
+          setMerkleTree(tree);
+          setGroupName(tree.groupName);
+          setRoot(tree.root);
+          setStage(Stage.WALLET);
+        });
+      } else {
+        const resp = await fetch(`/api/trees/${groupId}`);
+        const respData: MerkleTree = await resp.json();
+        if (!resp.ok) {
+          setStage(Stage.INVALID);
+          return;
+        }
+        setMerkleTree(respData);
+        setGroupName(respData.groupName);
+        setRoot(respData.root);
+        setStage(Stage.WALLET);
       }
-      setMerkleTree(respData);
-      setGroupName(respData.groupName);
-      setRoot(respData.root);
-      setStage(Stage.WALLET);
     }
     getMerkleTree();
   }, [groupId]);
