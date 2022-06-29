@@ -41,7 +41,11 @@ export default function LoadingText({ currentStage }: Props) {
       </div>
       <div className="flex">
         <span className="font-bold pr-2"> Note: </span>
-        <span> Your page may become unresponsive, but keep waiting! </span>
+        <span>
+          {" "}
+          Takes 3-4 minutes and your page may become unresponsive! Keep
+          waiting...{" "}
+        </span>
       </div>
       {/* <div>
         <span className="font-bold text-heyanonyellow">{`>>> `}</span>
