@@ -57,7 +57,7 @@ const Home: NextPage = () => {
                   and your message is sent via the specified event feed bot. The
                   message has with it a verify link twitter readers can use to
                   the proof located on ipfs themselves. For more, check out our
-                  github (TODO: add github).
+                  <a href="https://github.com/dizkus"> github</a>.
                 </div>
               </div>
 
