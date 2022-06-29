@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-import { MerkleTree } from "../../lib/merkleTree";
+import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 import { Stepper, Title, Button } from "../../components/Base";
 import Tooltip from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
@@ -27,14 +27,21 @@ const GroupPage = () => {
       if (!groupId) {
         return;
       }
-      const resp = await fetch(`/api/trees/${groupId}`);
-      const respData: MerkleTree = await resp.json();
-      if (!resp.ok) {
-        setStage(Stage.INVALID);
-        return;
+      if (groupId === "daohack") {
+        treeFromCloudfront("daohack.json").then((tree) => {
+          setMerkleTree(tree);
+          setStage(Stage.VALID);
+        });
+      } else {
+        const resp = await fetch(`/api/trees/${groupId}`);
+        const respData: MerkleTree = await resp.json();
+        if (!resp.ok) {
+          setStage(Stage.INVALID);
+          return;
+        }
+        setMerkleTree(respData);
+        setStage(Stage.VALID);
       }
-      setMerkleTree(respData);
-      setStage(Stage.VALID);
     }
     getMerkleTree();
   }, [groupId]);
