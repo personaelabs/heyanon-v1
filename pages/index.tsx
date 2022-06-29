@@ -62,6 +62,18 @@ const Home: NextPage = () => {
               </div>
 
               <div className="mb-8">
+                <strong>Why does it only work on Google Chrome?</strong>
+                <div>
+                  The zero-knowledge proofs we're working with are *really* big.
+                  Perhaps the biggest proofs anyone's tried to create on an
+                  end-user device. As such, we're entering into new territory
+                  with heyanon and have only been successful with Google Chrome
+                  so far. We're working on making things work in other web
+                  browsers and mobile wallets though!
+                </div>
+              </div>
+
+              <div className="mb-8">
                 <strong>How can you contribute or follow along?</strong>
                 <div>
                   Follow{" "}
