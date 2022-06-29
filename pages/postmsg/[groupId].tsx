@@ -27,7 +27,7 @@ enum Stage {
   CONNECTING = "Retreiving group",
   INVALID = "Invalid group :(",
   WALLET = "Connect with Metamask",
-  NEWADDRESS = "Choose a valid address",
+  NEWADDRESS = "Invalid address, please change",
   TWEET = "Enter your tweet & sign",
   GENERATE = "Generate a ZK proof",
   INPROGRESS = "Proof is being generated",
@@ -220,9 +220,25 @@ const PostMsgPage = () => {
 
         <div className="flex h-full items-center justify-center bg-heyanonred text-white">
           <div className="prose max-w-prose">
-            <div className="flex justify-center py-10">
-              <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
-            </div>
+            {stage !== Stage.INPROGRESS ? (
+              <div className="flex justify-center py-5">
+                <Image
+                  src="/logo.svg"
+                  alt="heyanon!"
+                  width="180"
+                  height="180"
+                />
+              </div>
+            ) : (
+              <div className="flex justify-center py-5">
+                <Image
+                  src="/logo_loading.gif"
+                  alt="heyanon!"
+                  width="200"
+                  height="200"
+                />
+              </div>
+            )}
 
             <div className="flex justify-between">
               <Stepper>ZK Proof Generation</Stepper>
