@@ -14,9 +14,10 @@ const textArray = [
 
 type Props = {
   currentStage: string;
+  isProof: boolean;
 };
 
-export default function LoadingText({ currentStage }: Props) {
+export default function LoadingText({ currentStage, isProof }: Props) {
   const [timer, setTimer] = useState(0);
   const [text, setText] = useState(textArray[0]);
 
@@ -39,14 +40,16 @@ export default function LoadingText({ currentStage }: Props) {
           <ClipLoader color={"black"} loading={true} size={15} />
         </div>
       </div>
-      <div className="flex">
-        <span className="font-bold pr-2"> Note: </span>
-        <span>
-          {" "}
-          Takes 3-4 minutes and your page may become unresponsive! Keep
-          waiting...{" "}
-        </span>
-      </div>
+      {isProof && (
+        <div className="flex">
+          <span className="font-bold pr-2"> Note: </span>
+          <span>
+            {" "}
+            Takes 3-4 minutes and your page may become unresponsive! Keep
+            waiting...{" "}
+          </span>
+        </div>
+      )}
       {/* <div>
         <span className="font-bold text-heyanonyellow">{`>>> `}</span>
         <span> Running for {timer} seconds </span>

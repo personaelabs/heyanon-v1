@@ -54,14 +54,14 @@ const GroupPage = () => {
           </div>
 
           <div className="flex justify-between">
-            <Stepper>Heyanon group</Stepper>
+            <Stepper>heyanon! Group Info</Stepper>
           </div>
 
           <Title>{stage}</Title>
 
           <div className="my-5">
             {stage === Stage.CONNECTING && (
-              <LoadingText currentStage="Retreiving group" />
+              <LoadingText currentStage="Retreiving group" isProof={false} />
             )}
 
             {stage === Stage.VALID && (

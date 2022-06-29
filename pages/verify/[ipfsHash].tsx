@@ -113,7 +113,7 @@ const VerifyPage = () => {
           <div className="my-5">
             <InfoRow name="IPFS hash" content={`${ipfsHash}`} />
             {stage === FileStage.CONNECTING && (
-              <LoadingText currentStage="Connecting to IPFS" />
+              <LoadingText currentStage="Connecting to IPFS" isProof={false} />
             )}
 
             {stage === FileStage.INVALID && (

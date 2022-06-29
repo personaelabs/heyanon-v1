@@ -283,7 +283,10 @@ const PostMsgPage = () => {
                 </>
               )}
               {stage === Stage.INPROGRESS && (
-                <LoadingText currentStage={`${loadingMessage}`} />
+                <LoadingText
+                  currentStage={`${loadingMessage}`}
+                  isProof={true}
+                />
               )}
               {stage === Stage.SUBMIT && (
                 <InfoRow
