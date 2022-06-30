@@ -15,11 +15,9 @@ const Home: NextPage = () => {
 
         <div className="flex h-full justify-center bg-heyanonred text-white">
           <div className="items-center justify-center self-center prose max-w-prose">
-            <div className="flex justify-center pt-10">
+            <div className="flex justify-center pt-10 pb-10">
               <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
             </div>
-
-            <Title>FAQ</Title>
 
             <div className="grid">
               <div className="mb-8">
@@ -28,8 +26,8 @@ const Home: NextPage = () => {
                 </strong>
                 <div>
                   <a href="https://heyanon.xyz">heyanon </a>
-                  is a way for people <i>who did cool stuff</i> or are{" "}
-                  <i>in cool groups</i> on Ethereum to broadcast messages
+                  is a way for people who are <i>in cool groups</i> or{" "}
+                  <i>did cool stuff</i> on Ethereum to broadcast messages
                   anonymously on Twitter. These feeds are curated by the
                   <a href="https://twitter.com/heyanonxyz"> @heyanonxyz </a>
                   account, such as the{" "}
@@ -49,10 +47,7 @@ const Home: NextPage = () => {
                 </strong>
                 <div>
                   When you send a message with heyanon, you generate a
-                  <a href="https://en.wikipedia.org/wiki/Zero-knowledge_proof">
-                    {" "}
-                    zero-knowledge proof{" "}
-                  </a>
+                  <a href="http://learn.0xparc.org/"> zero-knowledge proof </a>
                   that you are in a specific group or involved with a certain
                   historical event on-chain. This proof hides all information
                   about your address. The proof is all that is sent to the{" "}
@@ -97,11 +92,12 @@ const Home: NextPage = () => {
                   updates and new message feeds. Join our{" "}
                   <a href="https://discord.gg/4J3XzZJf">discord</a> for misc.
                   discussion.
-                  <br />
-                  <br />
-                  With &lt;3, the heyanon team. Powered by{" "}
-                  <a href="https://0xparc.org/"> 0xPARC</a>.
                 </div>
+              </div>
+
+              <div className="flex justify-center mt-8 mb-8">
+                With &lt;3, the heyanon team. Powered by&nbsp;
+                <a href="https://0xparc.org/"> 0xPARC</a>.
               </div>
             </div>
           </div>

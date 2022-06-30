@@ -45,8 +45,8 @@ export default function LoadingText({ currentStage, isProof }: Props) {
           <span className="font-bold pr-2"> Note: </span>
           <span>
             {" "}
-            Takes 3-4 minutes and your page may become unresponsive! Keep
-            waiting...{" "}
+            Takes a few minutes and your page may go blank or become
+            unresponsive! Don&apos;t close your tab...{" "}
           </span>
         </div>
       )}
