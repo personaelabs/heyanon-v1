@@ -313,7 +313,7 @@ const PostMsgPage = () => {
               {stage === Stage.SUCCESS && (
                 <>
                   <InfoRow
-                    name="Link to tweet"
+                    name="Link"
                     content={<a href={`${tweetLink}`}>{`${tweetLink}`}</a>}
                   />
                   <InfoRow name="IPFS Hash" content={`${proofIpfs}`} />

@@ -46,7 +46,7 @@ export default function LoadingText({ currentStage, isProof }: Props) {
           <span>
             {" "}
             Takes a few minutes and your page may go blank or become
-            unresponsive! Don&apos;t close your tab...{" "}
+            unresponsive! Keep waiting and don&apos;t close your tab...{" "}
           </span>
         </div>
       )}
