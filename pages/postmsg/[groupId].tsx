@@ -13,11 +13,7 @@ import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { setupWeb3 } from "../../lib/frontend/web3";
-import {
-  buildInput,
-  generateProof,
-  downloadProofFiles,
-} from "../../lib/frontend/zkp";
+import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
 // tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'

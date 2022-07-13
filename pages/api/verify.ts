@@ -5,7 +5,7 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof } from "../../lib/backend/zkp";
+import { verifyProof } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 
 // NOTE: this also exists in lib/frontend/zkp.ts

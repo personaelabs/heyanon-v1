@@ -1,8 +1,8 @@
 // TODO: we can set the circuit we're using in a variable and have that propagate down to
 // all of these variable names
 
-import { MerkleTree } from "../merkleTree";
-import { vkey } from "../vkey";
+import { MerkleTree } from "./merkleTree";
+import { vkey } from "./vkey";
 
 const localforage = require("localforage");
 const snarkjs = require("snarkjs");

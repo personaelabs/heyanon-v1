@@ -10,7 +10,7 @@ const Home: NextPage = () => {
         <Head>
           <title>heyanon!</title>
           <link rel="icon" href="/heyanon.ico" />
-          <script async src="snarkjs.min.js"></script>
+          {/* <script async src="snarkjs.min.js"></script> */}
         </Head>
 
         <div className="flex h-full justify-center bg-heyanonred text-white">
