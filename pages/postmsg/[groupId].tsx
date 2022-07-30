@@ -24,6 +24,7 @@ enum Stage {
   INVALID = "Invalid group :(",
   WALLET = "Connect with Metamask",
   NEWADDRESS = "Invalid address, please change",
+  MSGTYPE = "Select message type",
   TWEET = "Enter your tweet & sign",
   GENERATE = "Generate a ZK proof",
   INPROGRESS = "Proof is being generated",
@@ -59,6 +60,9 @@ const PostMsgPage = () => {
   const [proofIpfs, setProofIpfs] = useState(null);
   const [tweetLink, setTweetLink] = useState(null);
 
+  const [msgType, setMsgType] = useState<string | null>(null);
+  const [replyId, setReplyId] = useState<string | null>(null);
+
   useEffect(() => {
     async function getMerkleTree() {
       if (!groupId) {
@@ -81,7 +85,8 @@ const PostMsgPage = () => {
         setMerkleTree(respData);
         setGroupName(respData.groupName);
         setRoot(respData.root);
-        setStage(Stage.WALLET);
+        setStage(Stage.MSGTYPE);
+        // setStage(Stage.WALLET);
       }
     }
     getMerkleTree();
@@ -98,7 +103,8 @@ const PostMsgPage = () => {
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);
       } else {
-        setStage(Stage.TWEET);
+        // setStage(Stage.TWEET);
+        setStage(Stage.MSGTYPE);
       }
     };
     connectToMetamaskAsync();
@@ -197,6 +203,18 @@ const PostMsgPage = () => {
     setSlideoverOpen(true);
   };
 
+  const toggleMsgType = (event: any) => {
+    if (event.target.value === "reply") {
+      setMsgType("reply");
+    } else if (event.target.value === "post") {
+      setMsgType("post");
+      setReplyId(null);
+    } else {
+      setMsgType(null);
+      setReplyId(null);
+    }
+  };
+
   return (
     <>
       <div className="h-screen">
@@ -261,6 +279,41 @@ const PostMsgPage = () => {
               )}
               {stage === Stage.NEWADDRESS && (
                 <InfoRow name="Connected address" content={`${address}`} />
+              )}
+              {stage === Stage.MSGTYPE && (
+                <div>
+                  <div onChange={(event) => toggleMsgType(event)}>
+                    <input type="radio" value="post" name="msg_type" /> Post
+                    <br />
+                    <input type="radio" value="reply" name="msg_type" /> Reply
+                    <br />
+                  </div>
+
+                  <br />
+                  {msgType === "reply" && (
+                    <div>
+                      <textarea
+                        rows={4}
+                        name="replyId"
+                        id="replyId"
+                        className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                        placeholder={"Enter tweet ID to reply to..."}
+                        onChange={(e) => setReplyId(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  <br />
+
+                  {msgType !== null &&
+                    (msgType === "post" || replyId !== null) && (
+                      <div>
+                        <Button onClick={() => setStage(Stage.TWEET)}>
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                </div>
               )}
               {stage === Stage.TWEET && (
                 <div className="">
