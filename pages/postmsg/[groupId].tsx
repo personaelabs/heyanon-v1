@@ -12,7 +12,7 @@ import LoadingText from "../../components/LoadingText";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { setupWeb3 } from "../../lib/frontend/web3";
+import { eip712MsgHash, eip712Sign, setupWeb3 } from "../../lib/frontend/web3";
 import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
@@ -106,20 +106,18 @@ const PostMsgPage = () => {
 
   const signMessage = () => {
     const signMessageAsync = async () => {
-      const signature = await signer.signMessage(msg);
-      console.log(`sig: ${signature}`);
+      const signature = await eip712Sign(signer, "retweet", msg);
+      console.log(`typed sig: ${signature}`);
       setSig(signature);
 
-      const msgHash = ethers.utils.hashMessage(msg);
-      const msgHashBytes = ethers.utils.arrayify(msgHash);
-      console.log(`msghash: ${msgHash}`);
+      const msgHash = await eip712MsgHash("retweet", msg);
       setMsghash(msgHash);
 
-      const pubkey = ethers.utils.recoverPublicKey(msgHashBytes, signature);
-      console.log(`pk: ${pubkey}`);
+      const pubkey = ethers.utils.recoverPublicKey(msgHash, signature);
       setPubkey(pubkey);
-
       const recoveredAddress = ethers.utils.computeAddress(pubkey);
+      console.log(`recovered address: ${recoveredAddress}`);
+
       const actualAddress = await signer.getAddress();
       if (recoveredAddress != actualAddress) {
         console.log(
