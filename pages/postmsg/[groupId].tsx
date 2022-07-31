@@ -196,7 +196,6 @@ const PostMsgPage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      // TODO: change message to be the eip712 value?
       body: JSON.stringify({
         proof,
         publicSignals,
