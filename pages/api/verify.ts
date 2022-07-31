@@ -42,6 +42,15 @@ export default async function handler(
   const proof = body.proof;
   const publicSignals: string[] = body.publicSignals;
   const msg = body.message;
+  const msgType = body.msgType;
+  if (msgType !== "post" && msgType !== "reply") {
+    console.log(`Unsupported message type: ${msgType}`);
+    res.status(400).json("Unsupported message type");
+    return;
+  }
+
+  const replyId = body.replyId;
+
   const groupId = body.groupId;
 
   const merkleRoot = publicSignals[0];
@@ -90,13 +99,24 @@ export default async function handler(
     );
     console.log(`Posted to ipfs: ${cid.toString()}`);
 
-    const tweetURL = await postTweet(
-      `${msg}
+    const tweetURL =
+      msgType === "post"
+        ? await postTweet(
+            `${msg}
   
 heyanon.xyz/verify/${cid.toString()}`,
-      groupMerkleTree.secretIndex,
-      groupMerkleTree.twitterAccount
-    );
+            groupMerkleTree.secretIndex,
+            groupMerkleTree.twitterAccount
+          )
+        : await postTweet(
+            `${msg}
+  
+heyanon.xyz/verify/${cid.toString()}`,
+            groupMerkleTree.secretIndex,
+            groupMerkleTree.twitterAccount,
+            replyId
+          );
+
     res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
     return;
   }

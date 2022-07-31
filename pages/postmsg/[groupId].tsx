@@ -85,8 +85,7 @@ const PostMsgPage = () => {
         setMerkleTree(respData);
         setGroupName(respData.groupName);
         setRoot(respData.root);
-        setStage(Stage.MSGTYPE);
-        // setStage(Stage.WALLET);
+        setStage(Stage.WALLET);
       }
     }
     getMerkleTree();
@@ -103,7 +102,6 @@ const PostMsgPage = () => {
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);
       } else {
-        // setStage(Stage.TWEET);
         setStage(Stage.MSGTYPE);
       }
     };
@@ -112,11 +110,11 @@ const PostMsgPage = () => {
 
   const signMessage = () => {
     const signMessageAsync = async () => {
-      const signature = await eip712Sign(signer, "retweet", msg);
+      const signature = await eip712Sign(signer, msgType!, msg);
       console.log(`typed sig: ${signature}`);
       setSig(signature);
 
-      const msgHash = await eip712MsgHash("retweet", msg);
+      const msgHash = await eip712MsgHash(msgType!, msg);
       setMsghash(msgHash);
 
       const pubkey = ethers.utils.recoverPublicKey(msgHash, signature);
@@ -125,6 +123,7 @@ const PostMsgPage = () => {
       console.log(`recovered address: ${recoveredAddress}`);
 
       const actualAddress = await signer.getAddress();
+      console.log(actualAddress);
       if (recoveredAddress != actualAddress) {
         console.log(
           `Address mismatch on recovery! Recovered ${recoveredAddress} but signed with ${actualAddress}`
@@ -188,7 +187,9 @@ const PostMsgPage = () => {
         proof,
         publicSignals,
         message: msg,
-        groupId: groupId,
+        groupId,
+        msgType,
+        replyId,
       }),
     });
     const respData = await resp.json();
