@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { _TypedDataEncoder } from "ethers/lib/utils";
 
 declare let window: any;
 let signer: any, provider: any, network: any;
@@ -43,30 +42,6 @@ const TYPES = {
     { name: "contents", type: "string" },
   ],
 };
-export async function eip712Sign(
-  signer: any,
-  msgType: string,
-  msgContents: string
-) {
-  const value = {
-    platform: "twitter",
-    type: msgType,
-    contents: msgContents,
-  };
-  const signature = await signer._signTypedData(DOMAIN, TYPES, value);
-  return signature;
-}
-
-export async function eip712MsgHash(msgType: string, msgContents: string) {
-  const value = {
-    platform: "twitter",
-    type: msgType,
-    contents: msgContents,
-  };
-  const msgHash = _TypedDataEncoder.hash(DOMAIN, TYPES, value);
-
-  return msgHash;
-}
 
 export const getProvider = () => provider;
 export const getSigner = () => signer;

@@ -12,7 +12,8 @@ import LoadingText from "../../components/LoadingText";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { eip712MsgHash, eip712Sign, setupWeb3 } from "../../lib/frontend/web3";
+import { setupWeb3 } from "../../lib/frontend/web3";
+import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
 import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
@@ -46,6 +47,9 @@ const PostMsgPage = () => {
 
   const [msg, setMsg] = useState<string>("");
   const [sig, setSig] = useState<string>("");
+
+  const [eip712Value, setEip712Value] = useState<EIP712Value>();
+
   const [msghash, setMsghash] = useState<string>("");
   const [pubkey, setPubkey] = useState<string>("");
 
@@ -114,7 +118,13 @@ const PostMsgPage = () => {
       console.log(`typed sig: ${signature}`);
       setSig(signature);
 
-      const msgHash = await eip712MsgHash(msgType!, msg);
+      const eip712Value: EIP712Value = {
+        platform: "twitter",
+        type: msgType!,
+        contents: msg,
+      };
+      setEip712Value(eip712Value);
+      const msgHash = eip712MsgHash(eip712Value);
       setMsghash(msgHash);
 
       const pubkey = ethers.utils.recoverPublicKey(msgHash, signature);
@@ -160,6 +170,9 @@ const PostMsgPage = () => {
         )
       );
 
+      console.log("Proof inputs:");
+      console.log(input);
+
       setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Downloading proving key");
@@ -183,12 +196,12 @@ const PostMsgPage = () => {
       headers: {
         "Content-Type": "application/json",
       },
+      // TODO: change message to be the eip712 value?
       body: JSON.stringify({
         proof,
         publicSignals,
-        message: msg,
+        eip712Value,
         groupId,
-        msgType,
         replyId,
       }),
     });
@@ -308,6 +321,7 @@ const PostMsgPage = () => {
 
                   {msgType !== null &&
                     (msgType === "post" || replyId !== null) && (
+                      // TODO: disable when replyId is empty
                       <div>
                         <Button onClick={() => setStage(Stage.TWEET)}>
                           Next
