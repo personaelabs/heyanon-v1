@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { setupWeb3 } from "../../lib/frontend/web3";
+import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
 import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
@@ -24,6 +25,7 @@ enum Stage {
   INVALID = "Invalid group :(",
   WALLET = "Connect with Metamask",
   NEWADDRESS = "Invalid address, please change",
+  MSGTYPE = "Select message type",
   TWEET = "Enter your tweet & sign",
   GENERATE = "Generate a ZK proof",
   INPROGRESS = "Proof is being generated",
@@ -45,6 +47,9 @@ const PostMsgPage = () => {
 
   const [msg, setMsg] = useState<string>("");
   const [sig, setSig] = useState<string>("");
+
+  const [eip712Value, setEip712Value] = useState<EIP712Value>();
+
   const [msghash, setMsghash] = useState<string>("");
   const [pubkey, setPubkey] = useState<string>("");
 
@@ -58,6 +63,9 @@ const PostMsgPage = () => {
 
   const [proofIpfs, setProofIpfs] = useState(null);
   const [tweetLink, setTweetLink] = useState(null);
+
+  const [msgType, setMsgType] = useState<string | null>(null);
+  const [replyId, setReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     async function getMerkleTree() {
@@ -98,7 +106,7 @@ const PostMsgPage = () => {
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);
       } else {
-        setStage(Stage.TWEET);
+        setStage(Stage.MSGTYPE);
       }
     };
     connectToMetamaskAsync();
@@ -106,21 +114,26 @@ const PostMsgPage = () => {
 
   const signMessage = () => {
     const signMessageAsync = async () => {
-      const signature = await signer.signMessage(msg);
-      console.log(`sig: ${signature}`);
+      const signature = await eip712Sign(signer, msgType!, msg);
+      console.log(`typed sig: ${signature}`);
       setSig(signature);
 
-      const msgHash = ethers.utils.hashMessage(msg);
-      const msgHashBytes = ethers.utils.arrayify(msgHash);
-      console.log(`msghash: ${msgHash}`);
+      const eip712Value: EIP712Value = {
+        platform: "twitter",
+        type: msgType!,
+        contents: msg,
+      };
+      setEip712Value(eip712Value);
+      const msgHash = eip712MsgHash(eip712Value);
       setMsghash(msgHash);
 
-      const pubkey = ethers.utils.recoverPublicKey(msgHashBytes, signature);
-      console.log(`pk: ${pubkey}`);
+      const pubkey = ethers.utils.recoverPublicKey(msgHash, signature);
       setPubkey(pubkey);
-
       const recoveredAddress = ethers.utils.computeAddress(pubkey);
+      console.log(`recovered address: ${recoveredAddress}`);
+
       const actualAddress = await signer.getAddress();
+      console.log(actualAddress);
       if (recoveredAddress != actualAddress) {
         console.log(
           `Address mismatch on recovery! Recovered ${recoveredAddress} but signed with ${actualAddress}`
@@ -157,6 +170,9 @@ const PostMsgPage = () => {
         )
       );
 
+      console.log("Proof inputs:");
+      console.log(input);
+
       setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Downloading proving key");
@@ -183,8 +199,9 @@ const PostMsgPage = () => {
       body: JSON.stringify({
         proof,
         publicSignals,
-        message: msg,
-        groupId: groupId,
+        eip712Value,
+        groupId,
+        replyId,
       }),
     });
     const respData = await resp.json();
@@ -197,6 +214,18 @@ const PostMsgPage = () => {
     setSlideoverTitle(title);
     setSlideoverContent(slideoverContent);
     setSlideoverOpen(true);
+  };
+
+  const toggleMsgType = (event: any) => {
+    if (event.target.value === "reply") {
+      setMsgType("reply");
+    } else if (event.target.value === "post") {
+      setMsgType("post");
+      setReplyId(null);
+    } else {
+      setMsgType(null);
+      setReplyId(null);
+    }
   };
 
   return (
@@ -263,6 +292,42 @@ const PostMsgPage = () => {
               )}
               {stage === Stage.NEWADDRESS && (
                 <InfoRow name="Connected address" content={`${address}`} />
+              )}
+              {stage === Stage.MSGTYPE && (
+                <div>
+                  <div onChange={(event) => toggleMsgType(event)}>
+                    <input type="radio" value="post" name="msg_type" /> Post
+                    <br />
+                    <input type="radio" value="reply" name="msg_type" /> Reply
+                    <br />
+                  </div>
+
+                  <br />
+                  {msgType === "reply" && (
+                    <div>
+                      <textarea
+                        rows={4}
+                        name="replyId"
+                        id="replyId"
+                        className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                        placeholder={"Enter tweet ID to reply to..."}
+                        onChange={(e) => setReplyId(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  <br />
+
+                  {msgType !== null &&
+                    (msgType === "post" || replyId !== null) && (
+                      // TODO: disable when replyId is empty
+                      <div>
+                        <Button onClick={() => setStage(Stage.TWEET)}>
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                </div>
               )}
               {stage === Stage.TWEET && (
                 <div className="">

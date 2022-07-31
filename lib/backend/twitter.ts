@@ -7,6 +7,8 @@ const consumerSecrets = process.env.TWIT_CONSUMER_SECRET!.split(" ");
 const accessTokens = process.env.TWIT_ACCESS_TOKEN!.split(" ");
 const accessSecrets = process.env.TWIT_ACCESS_SECRET!.split(" ");
 
+const manageTweetsURL = "https://api.twitter.com/2/tweets";
+
 type TwitResponse = {
   statusCode: number;
   body: {
@@ -16,11 +18,7 @@ type TwitResponse = {
   };
 };
 
-async function postTweet(
-  message: string,
-  secretIndex: number,
-  twitterAccount: string
-) {
+function getAuthHeader(secretIndex: number, endpointURL: string) {
   const oauth = new OAuth({
     consumer: {
       key: consumerKeys[secretIndex],
@@ -31,9 +29,7 @@ async function postTweet(
       crypto.createHmac("sha1", key).update(baseString).digest("base64"),
   });
 
-  const endpointURL = `https://api.twitter.com/2/tweets`;
-
-  const authHeader = oauth.toHeader(
+  return oauth.toHeader(
     oauth.authorize(
       {
         url: endpointURL,
@@ -45,9 +41,22 @@ async function postTweet(
       }
     )
   );
+}
 
-  let resp: TwitResponse = await got.post(endpointURL, {
-    json: { text: message },
+async function postTweet(
+  message: string,
+  secretIndex: number,
+  twitterAccount: string,
+  replyId?: string
+) {
+  const authHeader = getAuthHeader(secretIndex, manageTweetsURL);
+
+  let json: any = { text: message };
+  if (replyId !== undefined) {
+    json["reply"] = { in_reply_to_tweet_id: replyId };
+  }
+  let resp: TwitResponse = await got.post(manageTweetsURL, {
+    json,
     responseType: "json",
     headers: {
       Authorization: authHeader["Authorization"],

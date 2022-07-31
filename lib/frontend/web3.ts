@@ -29,6 +29,20 @@ export async function setupWeb3() {
   return { provider, signer, network: changeNetworkName(currentNetwork) };
 }
 
+const DOMAIN = {
+  name: "heyanon",
+  version: "1",
+  chainId: 1,
+  verifyingContract: "0x0000000000000000000000000000000000000000",
+};
+const TYPES = {
+  Message: [
+    { name: "platform", type: "string" },
+    { name: "type", type: "string" },
+    { name: "contents", type: "string" },
+  ],
+};
+
 export const getProvider = () => provider;
 export const getSigner = () => signer;
 export const getNetwork = () => network;

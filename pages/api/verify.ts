@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ethers } from "ethers";
 import fs from "fs";
 import path from "path";
 
@@ -7,6 +6,7 @@ import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
 import { verifyProof } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
+import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
 
 // NOTE: this also exists in lib/frontend/zkp.ts
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -25,7 +25,47 @@ function bigIntToArray(n: number, k: number, x: bigint) {
 }
 
 /**
+ * Verifies that the public signals corresponding to a submitted proof are consistent with the parameters in a request body
+ *
+ */
+function verifyRequestConsistency(
+  publicSignals: string[],
+  groupMerkleTree: MerkleTree,
+  eip712Value: EIP712Value
+) {
+  // groupID must correspond with the merkle root in public signals
+  const merkleRoot = publicSignals[0];
+  if (merkleRoot !== groupMerkleTree.root) {
+    console.log(
+      `Expected merkle root ${groupMerkleTree.root} got ${merkleRoot}`
+    );
+    return false;
+  }
+
+  // msgHash in public signals must correspond to the hash of the message body
+  const msgHashArray = publicSignals.slice(1).map(BigInt);
+
+  const expectedMsgHash = eip712MsgHash(eip712Value);
+  const expectedMsgHashArray = bigIntToArray(64, 4, BigInt(expectedMsgHash));
+  if (
+    msgHashArray.length !== expectedMsgHashArray.length ||
+    !msgHashArray.every((v, i) => v === expectedMsgHashArray[i])
+  ) {
+    console.log(
+      `Expected msg hash ${expectedMsgHashArray} got ${msgHashArray}`
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Verify a user's proof and send a tweet if it passes verification
+ * checks:
+ * - merkle root in public signals matches that of the bot being posted to
+ * - msghash is (eip712) hash of message
+ * - proof + publicSignals pass verification
  *
  * @param req
  * @param res
@@ -39,68 +79,55 @@ export default async function handler(
     body = JSON.parse(body);
   }
   console.log(`Received request: ${JSON.stringify(body)}`);
+
+  // TODO: should turn this into request validation
   const proof = body.proof;
   const publicSignals: string[] = body.publicSignals;
-  const msg = body.message;
+  const eip712Value: EIP712Value = body.eip712Value;
+  const replyId = body.replyId;
+
   const groupId = body.groupId;
-
-  const merkleRoot = publicSignals[0];
-  const msgHashArray = publicSignals.slice(1).map(BigInt);
-  const expectedMsgHashArray = bigIntToArray(
-    64,
-    4,
-    BigInt(ethers.utils.hashMessage(msg))
-  );
-
-  const filename = `${groupId}.json`;
-  const filePath = path.resolve("./pages/api/trees", filename);
+  const filePath = path.resolve("./pages/api/trees", `${groupId}.json`);
   const buffer = fs.readFileSync(filePath);
   const groupMerkleTree: MerkleTree = JSON.parse(buffer.toString());
 
-  if (merkleRoot !== groupMerkleTree.root) {
-    console.log(
-      `Expected merkle root ${groupMerkleTree.root} got ${merkleRoot}`
-    );
-    res.status(400).json("incorrect merkle root used");
+  if (!verifyRequestConsistency(publicSignals, groupMerkleTree, eip712Value)) {
+    res.status(400).send("Inconsistent request");
     return;
   }
 
-  if (
-    msgHashArray.length !== expectedMsgHashArray.length ||
-    !msgHashArray.every((v, i) => v === expectedMsgHashArray[i])
-  ) {
-    console.log(
-      `msghash in publicSignals: ${msgHashArray} hash of message: ${expectedMsgHashArray}`
-    );
-    res.status(400).json("incorrect message for msghash");
-    return;
+  if (!verifyProof(proof, publicSignals)) {
+    console.log(`Failed verification for proof ${proof}`);
+    res.status(400).send("Failed proof verification");
   }
 
-  const verified = await verifyProof(proof, publicSignals);
-  console.log(`Verification status: ${verified}`);
+  const cid = await postToIpfs(
+    JSON.stringify({
+      proof: proof,
+      publicSignals: publicSignals,
+      eip712Value,
+      groupName: groupMerkleTree.groupName,
+    })
+  );
+  console.log(`Posted to ipfs: ${cid.toString()}`);
 
-  if (verified) {
-    const cid = await postToIpfs(
-      JSON.stringify({
-        proof: proof,
-        publicSignals: publicSignals,
-        message: msg,
-        groupName: groupMerkleTree.groupName,
-      })
-    );
-    console.log(`Posted to ipfs: ${cid.toString()}`);
-
-    const tweetURL = await postTweet(
-      `${msg}
+  const tweetURL =
+    eip712Value.type === "post"
+      ? await postTweet(
+          `${eip712Value.contents}
   
 heyanon.xyz/verify/${cid.toString()}`,
-      groupMerkleTree.secretIndex,
-      groupMerkleTree.twitterAccount
-    );
-    res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
-    return;
-  }
+          groupMerkleTree.secretIndex,
+          groupMerkleTree.twitterAccount
+        )
+      : await postTweet(
+          `${eip712Value.contents}
+  
+heyanon.xyz/verify/${cid.toString()}`,
+          groupMerkleTree.secretIndex,
+          groupMerkleTree.twitterAccount,
+          replyId
+        );
 
-  console.log(`Failed verification for proof ${proof}`);
-  res.status(400).json("failed verification");
+  res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
 }
