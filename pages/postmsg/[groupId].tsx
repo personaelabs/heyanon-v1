@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 import { Stepper, Title, Button } from "../../components/Base";
-import Tooltip from "../../components/Tooltip";
+import { InfoTooltip, Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import Slideover from "../../components/Slideover";
 import LoadingText from "../../components/LoadingText";
@@ -30,6 +30,7 @@ enum Stage {
   GENERATE = "Generate a ZK proof",
   INPROGRESS = "Proof is being generated",
   SUBMIT = "Submit proof and message",
+  PENDING = "Message has been submitted for approval",
   SUCCESS = "Message has been posted!",
 }
 
@@ -37,6 +38,7 @@ const PostMsgPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
 
+  const [isModerated, setIsModerated] = useState(false);
   const [stage, setStage] = useState<Stage>(Stage.CONNECTING);
   const [merkleTree, setMerkleTree] = useState<MerkleTree>();
   const [root, setRoot] = useState<string>("");
@@ -72,6 +74,7 @@ const PostMsgPage = () => {
       if (!groupId) {
         return;
       }
+
       if (groupId === "daohack") {
         treeFromCloudfront("daohack.json").then((tree) => {
           setMerkleTree(tree);
@@ -86,6 +89,7 @@ const PostMsgPage = () => {
           setStage(Stage.INVALID);
           return;
         }
+        setIsModerated(groupId.length >= 3 && groupId.slice(-3) === "mod");
         setMerkleTree(respData);
         setGroupName(respData.groupName);
         setRoot(respData.root);
@@ -204,10 +208,15 @@ const PostMsgPage = () => {
         replyId,
       }),
     });
-    const respData = await resp.json();
-    setProofIpfs(respData["ipfsHash"]);
-    setTweetLink(respData["tweetURL"]);
-    setStage(Stage.SUCCESS);
+
+    if (isModerated) {
+      setStage(Stage.PENDING);
+    } else {
+      const respData = await resp.json();
+      setProofIpfs(respData["ipfsHash"]);
+      setTweetLink(respData["tweetURL"]);
+      setStage(Stage.SUCCESS);
+    }
   };
 
   const openSlideOver = (slideoverContent: any, title: string) => {
@@ -288,6 +297,17 @@ const PostMsgPage = () => {
                     name="Merkle root"
                     content={<Tooltip text={`${root}`} />}
                   />
+                  {isModerated && (
+                    <InfoRow
+                      name="Moderation"
+                      content={
+                        <InfoTooltip
+                          status={"On"}
+                          info={`This group has been flagged as potentially unsafe. All verified tweets will be reviewed by our team before public posting.`}
+                        />
+                      }
+                    />
+                  )}
                 </>
               )}
               {stage === Stage.NEWADDRESS && (
@@ -370,6 +390,25 @@ const PostMsgPage = () => {
                     </span>
                   }
                 />
+              )}
+              {stage === Stage.PENDING && (
+                <>
+                  <InfoRow
+                    name="ZK Proof"
+                    content={
+                      <span
+                        onClick={() => openSlideOver(proof, "ZK Proof")}
+                        className="hover:cursor-pointer hover:text-terminal-green"
+                      >
+                        Click to view
+                      </span>
+                    }
+                  />
+                  <InfoRow
+                    name="Status"
+                    content={`Will be reviewed in 1-2 days.`}
+                  />
+                </>
               )}
               {stage === Stage.SUCCESS && (
                 <>

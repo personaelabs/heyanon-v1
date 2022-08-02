@@ -7,6 +7,7 @@ import { postTweet } from "../../lib/backend/twitter";
 import { verifyProof } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
+import { modSubmit } from "../../lib/backend/database";
 
 // NOTE: this also exists in lib/frontend/zkp.ts
 function bigIntToArray(n: number, k: number, x: bigint) {
@@ -26,7 +27,6 @@ function bigIntToArray(n: number, k: number, x: bigint) {
 
 /**
  * Verifies that the public signals corresponding to a submitted proof are consistent with the parameters in a request body
- *
  */
 function verifyRequestConsistency(
   publicSignals: string[],
@@ -87,6 +87,7 @@ export default async function handler(
   const replyId = body.replyId;
 
   const groupId = body.groupId;
+  const groupIsModerated = groupId.length >= 3 && groupId.slice(-3) === "mod";
   const filePath = path.resolve("./pages/api/trees", `${groupId}.json`);
   const buffer = fs.readFileSync(filePath);
   const groupMerkleTree: MerkleTree = JSON.parse(buffer.toString());
@@ -99,16 +100,31 @@ export default async function handler(
   if (!verifyProof(proof, publicSignals)) {
     console.log(`Failed verification for proof ${proof}`);
     res.status(400).send("Failed proof verification");
+    return;
   }
 
-  const cid = await postToIpfs(
-    JSON.stringify({
-      proof: proof,
-      publicSignals: publicSignals,
-      eip712Value,
-      groupName: groupMerkleTree.groupName,
-    })
-  );
+  const ipfsData = JSON.stringify({
+    proof: proof,
+    publicSignals: publicSignals,
+    message: eip712Value.contents,
+    groupName: groupMerkleTree.groupName,
+  });
+
+  if (groupIsModerated) {
+    await modSubmit(
+      groupId,
+      ipfsData,
+      eip712Value.contents,
+      eip712Value.type,
+      groupMerkleTree.secretIndex,
+      groupMerkleTree.twitterAccount,
+      replyId
+    );
+    res.status(200).end();
+    return;
+  }
+
+  const cid = await postToIpfs(ipfsData);
   console.log(`Posted to ipfs: ${cid.toString()}`);
 
   const tweetURL =
