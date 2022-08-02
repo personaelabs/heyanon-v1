@@ -18436,11 +18436,11 @@
       "0"
     ]
   },
-  "groupId": "nomadhack_mod",
-  "groupName": "The Nomad Hack",
+  "groupId": "nomadhackmod",
+  "groupName": "Nomad Whitehats",
   "twitterAccount": "NomadWhitehats",
   "description": "A merkle tree of all addresses that hacked the NomadXYZ bridge on 8/1/22",
-  "whyUseful": "Get confessions from those involved in a huge hack",
+  "whyUseful": "Discussion from verified Nomad exploiters who wish to white hat their money",
   "howGenerated": "Transactions to the bridge that called process() with 0x00 root",
   "secretIndex": 5
 }
