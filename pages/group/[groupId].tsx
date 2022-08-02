@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 import { Stepper, Title, Button } from "../../components/Base";
-import Tooltip from "../../components/Tooltip";
+import { Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import LoadingText from "../../components/LoadingText";
 

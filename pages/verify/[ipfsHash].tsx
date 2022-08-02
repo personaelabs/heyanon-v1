@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 
 import { Stepper, Title, Button } from "../../components/Base";
-import Tooltip from "../../components/Tooltip";
+import { Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import LoadingText from "../../components/LoadingText";
 import Slideover from "../../components/Slideover";
