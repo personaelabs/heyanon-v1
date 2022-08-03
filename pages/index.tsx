@@ -15,11 +15,24 @@ const Home: NextPage = () => {
 
         <div className="flex h-full justify-center bg-heyanonred text-white">
           <div className="items-center justify-center self-center prose max-w-prose">
-            <div className="flex justify-center pt-10 pb-10">
+            <div className="flex justify-center pt-10">
               <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
             </div>
 
             <div className="grid">
+              <div className="flex justify-center pb-5">
+                <Title>
+                  Post from{" "}
+                  <a
+                    href="https://twitter.com/heyanonxyz"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    @heyanonxyz
+                  </a>
+                  !
+                </Title>
+              </div>
               <div className="mb-8">
                 <strong>
                   <u>What is this site?</u>
