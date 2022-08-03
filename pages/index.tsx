@@ -22,7 +22,7 @@ const Home: NextPage = () => {
             <div className="grid">
               <div className="flex justify-center pb-5">
                 <Title>
-                  Post from{" "}
+                  Post using{" "}
                   <a
                     href="https://twitter.com/heyanonxyz"
                     target="_blank"
