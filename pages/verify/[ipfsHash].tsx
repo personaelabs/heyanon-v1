@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-import { Stepper, Title, Button } from "../../components/Base";
+import { Title, Button } from "../../components/Base";
 import { Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import LoadingText from "../../components/LoadingText";
@@ -79,7 +79,7 @@ const VerifyPage = () => {
   };
 
   return (
-    <div className="h-screen">
+    <div className="h-screen scroll-smooth">
       <Head>
         <title>heyanon!</title>
         <link rel="icon" href="/heyanon.ico" />
@@ -103,55 +103,64 @@ const VerifyPage = () => {
 
       <div className="flex h-full items-center justify-center bg-heyanonred text-white">
         <div className="prose max-w-prose">
-          <div className="flex justify-center py-10">
+          <div className="flex justify-center pt-10">
             <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
           </div>
-          <div className="flex justify-between">
-            <Stepper>ZK Proof Verification</Stepper>
-          </div>
-          <Title>Proof details</Title>
-          <div className="my-5">
-            <InfoRow name="IPFS hash" content={`${ipfsHash}`} />
-            {stage === FileStage.CONNECTING && (
-              <LoadingText currentStage="Connecting to IPFS" isProof={false} />
-            )}
 
-            {stage === FileStage.INVALID && (
-              <InfoRow name="Error" content="Invalid IPFS hash" />
-            )}
+          <div className="px-8">
+            <div className="flex justify-center text-center">
+              <Title> Proof details </Title>
+            </div>
 
-            {stage === FileStage.VALID && (
-              <>
-                <InfoRow name="Message" content={message} />
-                <InfoRow name="Group" content={groupName} />
-                <InfoRow name="Root" content={<Tooltip text={root} />} />
-                <InfoRow
-                  name="ZK Proof"
-                  content={
-                    <span
-                      onClick={() => openSlideOver(proof, "ZK Proof")}
-                      className="hover:cursor-pointer hover:text-terminal-green"
-                    >
-                      Click to view
-                    </span>
-                  }
+            <div className="mb-5">
+              <InfoRow
+                name="IPFS hash"
+                content={<Tooltip text={`${ipfsHash}`} />}
+              />
+              {stage === FileStage.CONNECTING && (
+                <LoadingText
+                  currentStage="Connecting to IPFS"
+                  isProof={false}
                 />
-                <InfoRow name="Verification status" content={verifyStatus} />
-              </>
-            )}
-          </div>
+              )}
 
-          <div className="flex py-2">
-            {stage === FileStage.VALID && (
-              <Button className="mr-5" onClick={verifyProofInBrowser}>
-                Verify in-browser
-              </Button>
-            )}
-            {stage === FileStage.VALID && (
-              <Button disabled={true} className="opacity-50">
-                Verify on-chain (soon!){" "}
-              </Button>
-            )}
+              {stage === FileStage.INVALID && (
+                <InfoRow name="Error" content="Invalid IPFS hash" />
+              )}
+
+              {stage === FileStage.VALID && (
+                <>
+                  <InfoRow name="Message" content={message} />
+                  <InfoRow name="Group" content={groupName} />
+                  <InfoRow name="Root" content={<Tooltip text={root} />} />
+                  <InfoRow
+                    name="ZK Proof"
+                    content={
+                      <span
+                        onClick={() => openSlideOver(proof, "ZK Proof")}
+                        className="hover:cursor-pointer hover:text-terminal-green"
+                      >
+                        Click to view
+                      </span>
+                    }
+                  />
+                  <InfoRow name="Verification status" content={verifyStatus} />
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-center py-2">
+              {stage === FileStage.VALID && (
+                <Button className="mr-5" onClick={verifyProofInBrowser}>
+                  Verify in-browser
+                </Button>
+              )}
+              {stage === FileStage.VALID && (
+                <Button disabled={true} className="opacity-50">
+                  Verify on-chain (soon!){" "}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

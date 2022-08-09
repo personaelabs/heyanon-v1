@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 
-import { Stepper, Title, Button } from "../../components/Base";
+import { Title, Button } from "../../components/Base";
 import { InfoTooltip, Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import Slideover from "../../components/Slideover";
@@ -264,135 +264,123 @@ const PostMsgPage = () => {
         <div className="flex h-full items-center justify-center bg-heyanonred text-white">
           <div className="prose max-w-prose">
             {stage !== Stage.INPROGRESS ? (
-              <div className="flex justify-center py-5">
+              <div className="flex justify-center pt-10">
                 <Image
                   src="/logo.svg"
                   alt="heyanon!"
-                  width="180"
-                  height="180"
+                  width="174"
+                  height="120"
                 />
               </div>
             ) : (
-              <div className="flex justify-center py-5">
+              <div className="flex justify-center pt-10">
                 <Image
                   src="/logo_loading.gif"
                   alt="heyanon!"
-                  width="200"
-                  height="200"
+                  width="220"
+                  height="220"
                 />
               </div>
             )}
 
-            <div className="flex justify-between">
-              <Stepper>ZK Proof Generation</Stepper>
-            </div>
+            <div className="px-8">
+              <div className="flex justify-center text-center">
+                <Title> {stage} </Title>
+              </div>
 
-            <Title> {stage} </Title>
-
-            <div className="my-5">
-              {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
-                <>
-                  <InfoRow name="Group" content={`${groupName}`} />
-                  <InfoRow
-                    name="Merkle root"
-                    content={<Tooltip text={`${root}`} />}
-                  />
-                  {isModerated && (
+              <div className="mb-5">
+                {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
+                  <>
+                    <InfoRow name="Group" content={`${groupName}`} />
                     <InfoRow
-                      name="Moderation"
-                      content={
-                        <InfoTooltip
-                          status={"On"}
-                          info={`This group has been flagged as potentially unsafe. All verified tweets will be reviewed by our team before public posting.`}
-                        />
-                      }
+                      name="Merkle root"
+                      content={<Tooltip text={`${root}`} />}
                     />
-                  )}
-                </>
-              )}
-              {stage === Stage.NEWADDRESS && (
-                <InfoRow name="Connected address" content={`${address}`} />
-              )}
-              {stage === Stage.MSGTYPE && (
-                <div>
-                  <div onChange={(event) => toggleMsgType(event)}>
-                    <input type="radio" value="post" name="msg_type" /> Post
-                    <br />
-                    <input type="radio" value="reply" name="msg_type" /> Reply
-                    <br />
-                  </div>
-
-                  <br />
-                  {msgType === "reply" && (
-                    <div>
-                      <textarea
-                        rows={4}
-                        name="replyId"
-                        id="replyId"
-                        className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
-                        placeholder={"Enter tweet ID to reply to..."}
-                        onChange={(e) => setReplyId(e.target.value)}
+                    {isModerated && (
+                      <InfoRow
+                        name="Moderation"
+                        content={
+                          <InfoTooltip
+                            status={"On"}
+                            info={`This group has been flagged as potentially unsafe. All verified tweets will be reviewed by our team before public posting.`}
+                          />
+                        }
                       />
+                    )}
+                  </>
+                )}
+                {stage === Stage.NEWADDRESS && (
+                  <InfoRow name="Connected address" content={`${address}`} />
+                )}
+                {stage === Stage.MSGTYPE && (
+                  <div>
+                    <div onChange={(event) => toggleMsgType(event)}>
+                      <input type="radio" value="post" name="msg_type" /> Post
+                      <br />
+                      <input type="radio" value="reply" name="msg_type" /> Reply
+                      <br />
                     </div>
-                  )}
 
-                  <br />
-
-                  {msgType !== null &&
-                    (msgType === "post" || replyId !== null) && (
-                      // TODO: disable when replyId is empty
+                    <br />
+                    {msgType === "reply" && (
                       <div>
-                        <Button onClick={() => setStage(Stage.TWEET)}>
-                          Next
-                        </Button>
+                        <textarea
+                          rows={4}
+                          name="replyId"
+                          id="replyId"
+                          className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                          placeholder={"Enter tweet ID to reply to..."}
+                          onChange={(e) => setReplyId(e.target.value)}
+                        />
                       </div>
                     )}
-                </div>
-              )}
-              {stage === Stage.TWEET && (
-                <div className="">
-                  <textarea
-                    rows={4}
-                    name="comment"
-                    id="comment"
-                    className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
-                    placeholder={"Enter tweet..."}
-                    onChange={(e) => setMsg(e.target.value)}
+
+                    <br />
+
+                    {msgType !== null &&
+                      (msgType === "post" || replyId !== null) && (
+                        // TODO: disable when replyId is empty
+                        <div>
+                          <Button onClick={() => setStage(Stage.TWEET)}>
+                            Next
+                          </Button>
+                        </div>
+                      )}
+                  </div>
+                )}
+                {stage === Stage.TWEET && (
+                  <div className="">
+                    <textarea
+                      rows={4}
+                      name="comment"
+                      id="comment"
+                      className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                      placeholder={"Enter tweet..."}
+                      onChange={(e) => setMsg(e.target.value)}
+                    />
+                  </div>
+                )}
+                {stage === Stage.GENERATE && (
+                  <>
+                    <InfoRow name="Group" content={`${groupName}`} />
+                    <InfoRow
+                      name="Merkle root"
+                      content={<Tooltip text={`${root}`} />}
+                    />
+                    <InfoRow
+                      name="Address"
+                      content={<Tooltip text={`${address}`} />}
+                    />
+                    <InfoRow name="Message" content={`${msg}`} />
+                  </>
+                )}
+                {stage === Stage.INPROGRESS && (
+                  <LoadingText
+                    currentStage={`${loadingMessage}`}
+                    isProof={true}
                   />
-                </div>
-              )}
-              {stage === Stage.GENERATE && (
-                <>
-                  <InfoRow name="Group" content={`${groupName}`} />
-                  <InfoRow
-                    name="Merkle root"
-                    content={<Tooltip text={`${root}`} />}
-                  />
-                  <InfoRow name="Address" content={`${address}`} />
-                  <InfoRow name="Message" content={`${msg}`} />
-                </>
-              )}
-              {stage === Stage.INPROGRESS && (
-                <LoadingText
-                  currentStage={`${loadingMessage}`}
-                  isProof={true}
-                />
-              )}
-              {stage === Stage.SUBMIT && (
-                <InfoRow
-                  name="ZK Proof"
-                  content={
-                    <span
-                      onClick={() => openSlideOver(proof, "ZK Proof")}
-                      className="hover:cursor-pointer hover:text-terminal-green"
-                    >
-                      Click to view
-                    </span>
-                  }
-                />
-              )}
-              {stage === Stage.PENDING && (
-                <>
+                )}
+                {stage === Stage.SUBMIT && (
                   <InfoRow
                     name="ZK Proof"
                     content={
@@ -404,48 +392,63 @@ const PostMsgPage = () => {
                       </span>
                     }
                   />
-                  <InfoRow
-                    name="Status"
-                    content={`Will be reviewed in 1-2 days.`}
-                  />
-                </>
-              )}
-              {stage === Stage.SUCCESS && (
-                <>
-                  <InfoRow
-                    name="Link"
-                    content={<a href={`${tweetLink}`}>{`${tweetLink}`}</a>}
-                  />
-                  <InfoRow name="IPFS Hash" content={`${proofIpfs}`} />
-                </>
-              )}
-            </div>
+                )}
+                {stage === Stage.PENDING && (
+                  <>
+                    <InfoRow
+                      name="ZK Proof"
+                      content={
+                        <span
+                          onClick={() => openSlideOver(proof, "ZK Proof")}
+                          className="hover:cursor-pointer hover:text-terminal-green"
+                        >
+                          Click to view
+                        </span>
+                      }
+                    />
+                    <InfoRow
+                      name="Status"
+                      content={`Will be reviewed in 1-2 days.`}
+                    />
+                  </>
+                )}
+                {stage === Stage.SUCCESS && (
+                  <>
+                    <InfoRow
+                      name="Link"
+                      content={<a href={`${tweetLink}`}>{`${tweetLink}`}</a>}
+                    />
+                    <InfoRow name="IPFS Hash" content={`${proofIpfs}`} />
+                  </>
+                )}
+              </div>
 
-            <div className="py-2">
-              {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
-                <Button onClick={connectToMetamask}>Connect Metamask</Button>
-              )}
-              {stage === Stage.TWEET && (
-                <Button
-                  disabled={
-                    msg === null ||
-                    msg.length === 0 ||
-                    msg.length > MAX_MESSAGE_LENGTH
-                  }
-                  onClick={signMessage}
-                  className="disabled:opacity-50"
-                >
-                  {msg.length > MAX_MESSAGE_LENGTH
-                    ? "Message too long"
-                    : "Sign"}
-                </Button>
-              )}
-              {stage === Stage.GENERATE && (
-                <Button onClick={genProof}>Generate</Button>
-              )}
-              {stage === Stage.SUBMIT && (
-                <Button onClick={submit}>Submit</Button>
-              )}
+              <div className="flex justify-center py-2">
+                {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
+                  <Button onClick={connectToMetamask}>Connect Metamask</Button>
+                )}
+                {stage === Stage.TWEET && (
+                  <Button
+                    disabled={
+                      msg === null ||
+                      msg.length === 0 ||
+                      msg.length > MAX_MESSAGE_LENGTH
+                    }
+                    onClick={signMessage}
+                    className="disabled:opacity-50"
+                  >
+                    {msg.length > MAX_MESSAGE_LENGTH
+                      ? "Message too long"
+                      : "Sign"}
+                  </Button>
+                )}
+                {stage === Stage.GENERATE && (
+                  <Button onClick={genProof}>Generate</Button>
+                )}
+                {stage === Stage.SUBMIT && (
+                  <Button onClick={submit}>Submit</Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
