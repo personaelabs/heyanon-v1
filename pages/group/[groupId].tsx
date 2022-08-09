@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
-import { Stepper, Title, Button } from "../../components/Base";
+import { Title } from "../../components/Base";
 import { Tooltip } from "../../components/Tooltip";
 import InfoRow from "../../components/InfoRow";
 import LoadingText from "../../components/LoadingText";
@@ -56,31 +56,43 @@ const GroupPage = () => {
 
       <div className="flex h-full items-center justify-center bg-heyanonred text-white">
         <div className="prose max-w-prose">
-          <div className="flex justify-center py-10">
+          <div className="flex justify-center pt-10">
             <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
           </div>
 
-          <div className="flex justify-between">
-            <Stepper>heyanon! Group Info</Stepper>
-          </div>
+          <div className="px-8">
+            {stage === Stage.INVALID && (
+              <div className="flex justify-center text-center">
+                <Title>{Stage.INVALID}</Title>
+              </div>
+            )}
 
-          <Title>{stage}</Title>
-
-          <div className="my-5">
             {stage === Stage.CONNECTING && (
-              <LoadingText currentStage="Retreiving group" isProof={false} />
+              <>
+                <div className="flex justify-center text-center">
+                  <Title>{groupId}</Title>
+                </div>
+                <LoadingText currentStage="Retreiving group" isProof={false} />
+              </>
             )}
 
             {stage === Stage.VALID && (
-              <>
-                <InfoRow name="Name" content={merkleTree!.groupName} />
+              <div>
+                <div className="flex justify-center text-center">
+                  <Title>
+                    <a
+                      href={`https://twitter.com/${merkleTree!.twitterAccount}`}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      @{merkleTree!.twitterAccount}
+                    </a>
+                  </Title>
+                </div>
+                <InfoRow name="Full name" content={merkleTree!.groupName} />
                 <InfoRow
                   name="Root"
                   content={<Tooltip text={merkleTree!.root} />}
-                />
-                <InfoRow
-                  name="Twitter account"
-                  content={`twitter.com/${merkleTree!.twitterAccount}`}
                 />
                 <InfoRow name="Description" content={merkleTree!.description} />
                 <InfoRow name="Why" content={merkleTree!.whyUseful} />
@@ -88,7 +100,7 @@ const GroupPage = () => {
                   name="How was it generated"
                   content={merkleTree!.howGenerated}
                 />
-              </>
+              </div>
             )}
           </div>
         </div>

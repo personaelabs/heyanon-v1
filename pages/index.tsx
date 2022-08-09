@@ -19,10 +19,10 @@ const Home: NextPage = () => {
               <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
             </div>
 
-            <div className="grid">
-              <div className="flex justify-center pb-5">
+            <div className="px-8">
+              <div className="flex text-center justify-center pb-5">
                 <Title>
-                  Post using{" "}
+                  Post from{" "}
                   <a
                     href="https://twitter.com/heyanonxyz"
                     target="_blank"
@@ -76,15 +76,15 @@ const Home: NextPage = () => {
 
               <div className="mb-8">
                 <strong>
-                  <u>Why does it only work on Google Chrome?</u>
+                  <u>Why does it only work in browser?</u>
                 </strong>
                 <div>
                   The zero-knowledge proofs we’re working with are *really* big.
                   Perhaps the biggest proofs anyone’s tried to create on an
                   end-user device. As such, we’re entering into new territory
-                  with heyanon and have only been successful with Google Chrome
-                  so far. We’re working on making things work in other web
-                  browsers and mobile wallets though!
+                  with heyanon and have only been successful with Google Chrome,
+                  Brave, and Safari so far. We’re working on making things work
+                  in other web browsers and mobile wallets though!
                   <br />
                   <br />
                   We could run these proofs on another machine that is more
@@ -108,8 +108,11 @@ const Home: NextPage = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center mt-8 mb-8">
-                With &lt;3, the heyanon team. Powered by&nbsp;
+              <div className="flex justify-center mt-8 ">
+                With &lt;3, the heyanon team.
+              </div>
+              <div className="flex justify-center mb-8">
+                Powered by&nbsp;
                 <a href="https://0xparc.org/"> 0xPARC</a>.
               </div>
             </div>

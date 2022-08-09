@@ -14,26 +14,26 @@ const ToolTipOuter = styled.div`
 
 const ToolTipText = styled.div`
   visibility: hidden;
-  width: 700;
+
+  width: 300px;
+  box-decoration-break: clone;
+  display: flex;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
   background-color: #ccccfb;
   color: black;
 
   text-align: center;
-  padding: 5px 0;
   border-radius: 6px;
 
-  /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 1;
 `;
 
 const ToolTipInner = styled.div`
-  box-decoration-break: clone;
-  display: inline;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  hyphens: auto;
-  padding: 10px 15px;
+  width: 300px;
+  padding: 5px;
 `;
 
 export function Tooltip({ text }: { text: string }) {
@@ -42,7 +42,8 @@ export function Tooltip({ text }: { text: string }) {
     <ToolTipOuter>
       {truncatedText}
       <ToolTipText>
-        <ToolTipInner>{text}</ToolTipInner>
+        {" "}
+        <ToolTipInner>{text}</ToolTipInner>{" "}
       </ToolTipText>
     </ToolTipOuter>
   );
