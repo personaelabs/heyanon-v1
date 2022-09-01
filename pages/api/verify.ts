@@ -4,26 +4,10 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof } from "../../lib/zkp";
+import { verifyProof, bigIntToArray } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
 import { modSubmit } from "../../lib/backend/database";
-
-// NOTE: this also exists in lib/frontend/zkp.ts
-function bigIntToArray(n: number, k: number, x: bigint) {
-  let divisor = 1n;
-  for (var idx = 0; idx < n; idx++) {
-    divisor = divisor * 2n;
-  }
-
-  let ret = [];
-  var x_temp = BigInt(x);
-  for (var idx = 0; idx < k; idx++) {
-    ret.push(x_temp % divisor);
-    x_temp = x_temp / divisor;
-  }
-  return ret;
-}
 
 /**
  * Verifies that the public signals corresponding to a submitted proof are consistent with the parameters in a request body

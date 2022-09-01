@@ -1,6 +1,8 @@
 module.exports = {
-  transformIgnorePatterns: ["node_modules/(?!(sucrase)/)"],
+  preset: "ts-jest",
+  testEnvironment: "node",
   transform: {
-    "^.+\\.(js|jsx|ts|tsx|mjs)$": "babel-jest",
+    "^.+\\.ts?$": "ts-jest",
   },
+  transformIgnorePatterns: ["<rootDir>/node_modules/"],
 };

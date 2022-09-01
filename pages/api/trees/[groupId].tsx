@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../lib/prisma";
+import { MerkleTree } from "../../../lib/merkleTree";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,12 +8,22 @@ export default async function handler(
 ) {
   let { groupId } = req.query;
 
-  const group = await prisma.group.findFirst({
+  const group = await prisma.group.findUnique({
     where: {
       abbr_name: groupId.toString(),
     },
     include: {
-      leaves: true,
+      leaves: {
+        include: {
+          user: true,
+        },
+      },
+      proof: true,
+      credential: {
+        select: {
+          twitter_account: true,
+        },
+      },
     },
   });
 
@@ -21,5 +32,13 @@ export default async function handler(
     return;
   }
 
-  res.status(200).json(group);
+  let leafToPathElements: { [address: string]: string[] } = {};
+  let leafToPathIndices: { [address: string]: string[] } = {};
+
+  for (const leaf of group.leaves) {
+    leafToPathElements[leaf.user.key] = leaf.path;
+    leafToPathIndices[leaf.user.key] = leaf.indices;
+  }
+
+  res.status(200).json({ ...group, leafToPathElements, leafToPathIndices });
 }

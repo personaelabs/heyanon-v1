@@ -38,7 +38,8 @@
     "react-spinners": "^0.12.0",
     "snarkjs": "git+https://github.com/vb7401/snarkjs.git#53e86631b5e409e5bd30300611b495ca469503bc",
     "styled-components": "^5.3.5",
-    "tailwindcss": "^3.1.3"
+    "tailwindcss": "^3.1.3",
+    "ts-jest": "^28.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",

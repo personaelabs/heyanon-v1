@@ -1,18 +1,21 @@
 // __tests__/animal.test.js
 // 🚨 Remember to keep your `*.test.js` files out of your `/pages` directory!
 import { createMocks } from "node-mocks-http";
+import { describe, expect, test } from "@jest/globals";
+
 import handler from "../../../../pages/api/trees/[groupId]";
 
 import fs from "fs";
 import path from "path";
 
 describe("/api/trees/[groupId]", () => {
+  jest.setTimeout(10000);
   test("database has same values as old JSON files", async () => {
     const files = fs
       .readdirSync("./__tests__/pages/api/trees")
       .filter((file) => file.endsWith(".json"));
 
-    for (const filename of files) {
+    const fileChecks = files.map(async (filename) => {
       const fileGroupId = filename.slice(0, filename.length - 5);
 
       const { req, res } = createMocks({
@@ -43,6 +46,8 @@ describe("/api/trees/[groupId]", () => {
           Object.keys(data.leafToPathElements).length
         );
       }
-    }
+    });
+
+    await Promise.all(fileChecks);
   });
 });

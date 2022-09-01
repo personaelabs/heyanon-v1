@@ -15,8 +15,8 @@ model Group {
   full_name         String
   how_generated     String
   moderation_status ModStatus
-  description       String?
-  why_useful        String?
+  description       String
+  why_useful        String
   static            Boolean
   last_update       DateTime  @default(now())
 

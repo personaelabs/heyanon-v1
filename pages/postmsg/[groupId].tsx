@@ -91,7 +91,7 @@ const PostMsgPage = () => {
         }
         setIsModerated(groupId.length >= 3 && groupId.slice(-3) === "mod");
         setMerkleTree(respData);
-        setGroupName(respData.groupName);
+        setGroupName(respData.full_name);
         setRoot(respData.root);
         setStage(Stage.WALLET);
       }
@@ -106,6 +106,9 @@ const PostMsgPage = () => {
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
       setAddress(addr);
+
+      console.log(Object.keys(merkleTree!.leafToPathElements));
+      console.log(BigInt(addr).toString());
 
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);

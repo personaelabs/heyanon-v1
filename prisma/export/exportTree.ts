@@ -10,7 +10,7 @@ const accessSecrets = process.env.TWIT_ACCESS_SECRET!.split(" ");
 const prisma = new PrismaClient();
 
 async function main() {
-  const directoryPath = path.join(__dirname, "../../pages/api/trees");
+  const directoryPath = path.join(__dirname, "../../__tests__/pages/api/trees");
 
   // find all json files
   let files = fs
@@ -23,23 +23,14 @@ async function main() {
     const buffer = fs.readFileSync(directoryPath + "/" + file);
     const data = JSON.parse(buffer.toString());
 
-    // skip if group already exists
-    const groupExists = await prisma.group.count({
-      where: {
-        root: data.root,
-        abbr_name: data.groupId,
-      },
-    });
-    if (groupExists > 0) {
-      continue;
-    }
-
     // check if credential is reused
     let credential = await prisma.credential.findFirst({
       where: {
-        twitter_account: data.twitter_account,
+        twitter_account: data.twitterAccount,
       },
     });
+
+    console.log(credential);
 
     if (!credential) {
       credential = await prisma.credential.create({
@@ -51,6 +42,17 @@ async function main() {
           twit_access_secret: accessSecrets[data.secretIndex],
         },
       });
+    }
+
+    // skip remaining steps if group already exists
+    const groupExists = await prisma.group.count({
+      where: {
+        root: data.root,
+        abbr_name: data.groupId,
+      },
+    });
+    if (groupExists > 0) {
+      continue;
     }
 
     const createdGroup = await prisma.group.create({

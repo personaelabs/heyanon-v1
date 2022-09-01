@@ -81,24 +81,26 @@ const GroupPage = () => {
                 <div className="flex justify-center text-center">
                   <Title>
                     <a
-                      href={`https://twitter.com/${merkleTree!.twitterAccount}`}
+                      href={`https://twitter.com/${
+                        merkleTree!.credential.twitter_account
+                      }`}
                       target="_blank"
                       rel="noreferrer noopener"
                     >
-                      @{merkleTree!.twitterAccount}
+                      @{merkleTree!.credential.twitter_account}
                     </a>
                   </Title>
                 </div>
-                <InfoRow name="Full name" content={merkleTree!.groupName} />
+                <InfoRow name="Full name" content={merkleTree!.full_name} />
                 <InfoRow
                   name="Root"
                   content={<Tooltip text={merkleTree!.root} />}
                 />
                 <InfoRow name="Description" content={merkleTree!.description} />
-                <InfoRow name="Why" content={merkleTree!.whyUseful} />
+                <InfoRow name="Why" content={merkleTree!.why_useful} />
                 <InfoRow
                   name="How was it generated"
-                  content={merkleTree!.howGenerated}
+                  content={merkleTree!.how_generated}
                 />
               </div>
             )}

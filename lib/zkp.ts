@@ -66,7 +66,7 @@ export async function verifyProof(proof: any, publicSignals: any) {
   return proofVerified;
 }
 
-function bigIntToArray(n: number, k: number, x: bigint) {
+export function bigIntToArray(n: number, k: number, x: bigint) {
   let divisor = 1n;
   for (var idx = 0; idx < n; idx++) {
     divisor = divisor * 2n;
