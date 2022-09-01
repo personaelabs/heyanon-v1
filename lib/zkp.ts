@@ -14,7 +14,7 @@ async function downloadFromFilename(proofType: Proof, filename: string) {
       method: "GET",
     });
     const zkeyBuff = await zkeyResp.arrayBuffer();
-    await localforage.setItem(proofType.filename, zkeyBuff);
+    await localforage.setItem(filename, zkeyBuff);
     console.log(`Storage of ${proofType.filename} successful!`);
   } catch (e) {
     console.log(
