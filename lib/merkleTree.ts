@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
 

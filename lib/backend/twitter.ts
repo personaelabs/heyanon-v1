@@ -1,11 +1,7 @@
 import got from "got";
 import crypto from "crypto";
 import OAuth from "oauth-1.0a";
-
-const consumerKeys = process.env.TWIT_CONSUMER_KEY!.split(" ");
-const consumerSecrets = process.env.TWIT_CONSUMER_SECRET!.split(" ");
-const accessTokens = process.env.TWIT_ACCESS_TOKEN!.split(" ");
-const accessSecrets = process.env.TWIT_ACCESS_SECRET!.split(" ");
+import { Credential } from "@prisma/client";
 
 const manageTweetsURL = "https://api.twitter.com/2/tweets";
 
@@ -18,11 +14,11 @@ type TwitResponse = {
   };
 };
 
-function getAuthHeader(secretIndex: number, endpointURL: string) {
+function getAuthHeader(credential: Credential, endpointURL: string) {
   const oauth = new OAuth({
     consumer: {
-      key: consumerKeys[secretIndex],
-      secret: consumerSecrets[secretIndex],
+      key: credential.twit_consumer_key!,
+      secret: credential.twit_consumer_secret!,
     },
     signature_method: "HMAC-SHA1",
     hash_function: (baseString, key) =>
@@ -36,8 +32,8 @@ function getAuthHeader(secretIndex: number, endpointURL: string) {
         method: "POST",
       },
       {
-        key: accessTokens[secretIndex],
-        secret: accessSecrets[secretIndex],
+        key: credential.twit_access_token!,
+        secret: credential.twit_access_secret!,
       }
     )
   );
@@ -45,11 +41,10 @@ function getAuthHeader(secretIndex: number, endpointURL: string) {
 
 async function postTweet(
   message: string,
-  secretIndex: number,
-  twitterAccount: string,
+  credential: Credential,
   replyId?: string
 ) {
-  const authHeader = getAuthHeader(secretIndex, manageTweetsURL);
+  const authHeader = getAuthHeader(credential, manageTweetsURL);
 
   let json: any = { text: message };
   if (replyId !== undefined) {
@@ -69,7 +64,7 @@ async function postTweet(
     throw new Error("error posting tweet");
   } else {
     const tweetID = resp.body.data.id;
-    const tweetURL = `https://twitter.com/${twitterAccount}/status/${tweetID}`;
+    const tweetURL = `https://twitter.com/${credential.twitter_account}/status/${tweetID}`;
     return tweetURL;
   }
 }

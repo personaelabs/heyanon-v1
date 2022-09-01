@@ -198,6 +198,16 @@ const PostMsgPage = () => {
   };
 
   const submit = async () => {
+    console.log(
+      "proof-data",
+      JSON.stringify({
+        proof,
+        publicSignals,
+        eip712Value,
+        groupId,
+        replyId,
+      })
+    );
     const resp = await fetch("/api/verify", {
       method: "POST",
       headers: {
