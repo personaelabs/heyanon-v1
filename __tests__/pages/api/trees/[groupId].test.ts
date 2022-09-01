@@ -42,7 +42,7 @@ describe("/api/trees/[groupId]", () => {
 
       if (fileGroupId !== "daohack") {
         // if not daohack group, should have same number of leaves
-        expect(group.leaves.length).toEqual(
+        expect(Object.keys(group.leafToPathElements).length).toEqual(
           Object.keys(data.leafToPathElements).length
         );
       }
