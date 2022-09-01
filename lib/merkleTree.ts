@@ -1,19 +1,24 @@
-const localforage = require("localforage");
-const snarkjs = require("snarkjs");
+import { Prisma } from "@prisma/client";
 
 const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
 
-export type MerkleTree = {
-  root: string;
+export type MerkleTree = Prisma.GroupGetPayload<{
+  include: {
+    leaves: {
+      include: {
+        user: true;
+      };
+    };
+    proof: true;
+    credential: {
+      select: {
+        twitter_account: true;
+      };
+    };
+  };
+}> & {
   leafToPathElements: { [address: string]: string[] };
-  leafToPathIndices: { [address: string]: number[] };
-  groupId: string;
-  groupName: string;
-  twitterAccount: string;
-  description: string;
-  whyUseful: string;
-  howGenerated: string;
-  secretIndex: number;
+  leafToPathIndices: { [address: string]: string[] };
 };
 
 export async function treeFromCloudfront(filename: string) {

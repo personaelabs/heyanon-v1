@@ -76,9 +76,9 @@ const PostMsgPage = () => {
       }
 
       if (groupId === "daohack") {
-        treeFromCloudfront("daohack.json").then((tree) => {
+        treeFromCloudfront("daohack.json").then((tree: MerkleTree) => {
           setMerkleTree(tree);
-          setGroupName(tree.groupName);
+          setGroupName(tree.full_name);
           setRoot(tree.root);
           setStage(Stage.WALLET);
         });
@@ -91,7 +91,7 @@ const PostMsgPage = () => {
         }
         setIsModerated(groupId.length >= 3 && groupId.slice(-3) === "mod");
         setMerkleTree(respData);
-        setGroupName(respData.groupName);
+        setGroupName(respData.full_name);
         setRoot(respData.root);
         setStage(Stage.WALLET);
       }
@@ -106,6 +106,9 @@ const PostMsgPage = () => {
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
       setAddress(addr);
+
+      console.log(Object.keys(merkleTree!.leafToPathElements));
+      console.log(BigInt(addr).toString());
 
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);
@@ -160,6 +163,7 @@ const PostMsgPage = () => {
       }
 
       const input = buildInput(
+        merkleTree.proof,
         merkleTree,
         BigInt(address).toString(),
         pubkey,
@@ -180,10 +184,13 @@ const PostMsgPage = () => {
       setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Downloading proving key");
-      await downloadProofFiles(filename);
+      await downloadProofFiles(merkleTree.proof);
 
       setLoadingMessage("Generating proof");
-      const { proof, publicSignals } = await generateProof(input, filename);
+      const { proof, publicSignals } = await generateProof(
+        input,
+        merkleTree.proof
+      );
 
       setProof(proof);
       setPublicSignals(publicSignals);
@@ -195,6 +202,16 @@ const PostMsgPage = () => {
   };
 
   const submit = async () => {
+    console.log(
+      "proof-data",
+      JSON.stringify({
+        proof,
+        publicSignals,
+        eip712Value,
+        groupId,
+        replyId,
+      })
+    );
     const resp = await fetch("/api/verify", {
       method: "POST",
       headers: {

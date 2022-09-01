@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { verifyProof } from "../../lib/zkp";
+import { Proof } from "@prisma/client";
 
 enum FileStage {
   CONNECTING,
@@ -27,6 +28,7 @@ const VerifyPage = () => {
   const [proof, setProof] = useState(null);
   const [publicSignals, setPublicSignals] = useState(null);
   const [message, setMessage] = useState<string>("");
+  const [proofType, setProofType] = useState<Proof | null>(null);
   const [root, setRoot] = useState<string>("");
   const [groupName, setGroupName] = useState<string>("");
 
@@ -37,7 +39,7 @@ const VerifyPage = () => {
   useEffect(() => {
     async function submit() {
       const resp = await fetch(`/api/getproof/${ipfsHash}`);
-      const respData = JSON.parse(await resp.json());
+      const respData = await resp.json();
 
       if (
         !resp.ok ||
@@ -54,6 +56,7 @@ const VerifyPage = () => {
         setPublicSignals(respData.publicSignals);
         setMessage(respData.message);
         setGroupName(respData.groupName);
+        setProofType(respData.proofType);
         setRoot(respData.publicSignals[0]);
       }
     }
@@ -64,7 +67,7 @@ const VerifyPage = () => {
 
   const verifyProofInBrowser = async () => {
     setVerifyStatus("Verifying...");
-    const proofVerified = await verifyProof(proof, publicSignals);
+    const proofVerified = await verifyProof(proof, publicSignals, proofType!);
     if (proofVerified) {
       setVerifyStatus("Verified in-browser ✅");
     } else {

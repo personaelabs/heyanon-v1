@@ -4,41 +4,23 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof } from "../../lib/zkp";
+import { verifyProof, bigIntToArray } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
-import { modSubmit } from "../../lib/backend/database";
-
-// NOTE: this also exists in lib/frontend/zkp.ts
-function bigIntToArray(n: number, k: number, x: bigint) {
-  let divisor = 1n;
-  for (var idx = 0; idx < n; idx++) {
-    divisor = divisor * 2n;
-  }
-
-  let ret = [];
-  var x_temp = BigInt(x);
-  for (var idx = 0; idx < k; idx++) {
-    ret.push(x_temp % divisor);
-    x_temp = x_temp / divisor;
-  }
-  return ret;
-}
+import prisma from "../../lib/prisma";
 
 /**
  * Verifies that the public signals corresponding to a submitted proof are consistent with the parameters in a request body
  */
 function verifyRequestConsistency(
   publicSignals: string[],
-  groupMerkleTree: MerkleTree,
+  groupRoot: string,
   eip712Value: EIP712Value
 ) {
   // groupID must correspond with the merkle root in public signals
   const merkleRoot = publicSignals[0];
-  if (merkleRoot !== groupMerkleTree.root) {
-    console.log(
-      `Expected merkle root ${groupMerkleTree.root} got ${merkleRoot}`
-    );
+  if (merkleRoot !== groupRoot) {
+    console.log(`Expected merkle root ${groupRoot} got ${merkleRoot}`);
     return false;
   }
 
@@ -80,24 +62,33 @@ export default async function handler(
   }
   console.log(`Received request: ${JSON.stringify(body)}`);
 
-  // TODO: should turn this into request validation
   const proof = body.proof;
   const publicSignals: string[] = body.publicSignals;
   const eip712Value: EIP712Value = body.eip712Value;
   const replyId = body.replyId;
 
   const groupId = body.groupId;
-  const groupIsModerated = groupId.length >= 3 && groupId.slice(-3) === "mod";
-  const filePath = path.resolve("./pages/api/trees", `${groupId}.json`);
-  const buffer = fs.readFileSync(filePath);
-  const groupMerkleTree: MerkleTree = JSON.parse(buffer.toString());
+  const group = await prisma.group.findUnique({
+    where: {
+      abbr_name: groupId.toString(),
+    },
+    include: {
+      credential: true,
+      proof: true,
+    },
+  });
 
-  if (!verifyRequestConsistency(publicSignals, groupMerkleTree, eip712Value)) {
+  if (!group) {
+    res.status(404).send("Group not found!");
+    return;
+  }
+
+  if (!verifyRequestConsistency(publicSignals, group.root, eip712Value)) {
     res.status(400).send("Inconsistent request");
     return;
   }
 
-  if (!verifyProof(proof, publicSignals)) {
+  if (!verifyProof(proof, publicSignals, group.proof)) {
     console.log(`Failed verification for proof ${proof}`);
     res.status(400).send("Failed proof verification");
     return;
@@ -107,22 +98,8 @@ export default async function handler(
     proof: proof,
     publicSignals: publicSignals,
     message: eip712Value.contents,
-    groupName: groupMerkleTree.groupName,
+    groupName: group.full_name,
   });
-
-  if (groupIsModerated) {
-    await modSubmit(
-      groupId,
-      ipfsData,
-      eip712Value.contents,
-      eip712Value.type,
-      groupMerkleTree.secretIndex,
-      groupMerkleTree.twitterAccount,
-      replyId
-    );
-    res.status(200).end();
-    return;
-  }
 
   const cid = await postToIpfs(ipfsData);
   console.log(`Posted to ipfs: ${cid.toString()}`);
@@ -133,15 +110,13 @@ export default async function handler(
           `${eip712Value.contents}
   
 heyanon.xyz/verify/${cid.toString()}`,
-          groupMerkleTree.secretIndex,
-          groupMerkleTree.twitterAccount
+          group.credential
         )
       : await postTweet(
           `${eip712Value.contents}
   
 heyanon.xyz/verify/${cid.toString()}`,
-          groupMerkleTree.secretIndex,
-          groupMerkleTree.twitterAccount,
+          group.credential,
           replyId
         );
 

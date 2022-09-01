@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Group {
+  id                Int       @id @default(autoincrement())
+  root              String
+  approved          Boolean   @default(false)
+  abbr_name         String  @unique
+  full_name         String
+  how_generated     String
+  moderation_status ModStatus
+  description       String
+  why_useful        String
+  static            Boolean
+  last_update       DateTime  @default(now())
+
+  proof_id Int
+  proof    Proof @relation(fields: [proof_id], references: [id])
+
+  parent_group_id Int?
+  parent_group    Group?  @relation("Subgroup", fields: [parent_group_id], references: [id])
+  child_groups    Group[] @relation("Subgroup")
+
+  credential_id Int     
+  credential Credential @relation(fields: [credential_id], references: [id])
+
+  leaves     Leaf[]
+  posts      Post[]
+}
+
+model Leaf {
+  id       Int      @id @default(autoincrement())
+  path     String[]
+  indices String[]
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  group_id Int
+  group    Group @relation(fields: [group_id], references: [id])
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  msg       String?
+  msg_hash  String?
+  ipfs_hash String?
+
+  group_id Int
+  group    Group @relation(fields: [group_id], references: [id])
+
+  votes Vote[]
+}
+
+model Proof {
+  id           Int     @id @default(autoincrement())
+  definition   String?
+  path_length  Int?
+  vkey         String
+  zkey_link    String
+  circuit_link String?
+  vkey_address String?
+  filename     String
+
+  groups Group[]
+}
+
+model User {
+  id         Int     @id @default(autoincrement())
+  key        String @unique
+  site_admin Boolean
+  reputation Int?
+
+  leaves Leaf[]
+  votes  Vote[]
+}
+
+model Vote {
+  id    Int    @id @default(autoincrement())
+  value String
+
+  post_id Int
+  post    Post @relation(fields: [post_id], references: [id])
+
+  user_id Int?
+  user    User? @relation(fields: [user_id], references: [id])
+}
+
+model Credential {
+  id Int @id @default(autoincrement())
+
+  twitter_account      String @unique
+  twit_consumer_key    String?
+  twit_consumer_secret String?
+  twit_access_token    String?
+  twit_access_secret   String?
+
+  groups    Group[] 
+}
+
+enum ModStatus {
+  NONE
+  SITEADMIN
+  GROUPADMIN
+}

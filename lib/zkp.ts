@@ -2,15 +2,13 @@
 // all of these variable names
 
 import { MerkleTree } from "./merkleTree";
-import { vkey } from "./vkey";
+import { Proof } from "@prisma/client";
 
 const localforage = require("localforage");
 const snarkjs = require("snarkjs");
 
-const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
-
-async function downloadFromFilename(filename: string) {
-  const link = loadURL + filename;
+async function downloadFromFilename(filename: string, proofType: Proof) {
+  const link = proofType.zkey_link + filename;
   try {
     const zkeyResp = await fetch(link, {
       method: "GET",
@@ -20,33 +18,34 @@ async function downloadFromFilename(filename: string) {
     console.log(`Storage of ${filename} successful!`);
   } catch (e) {
     console.log(
-      `Storage of ${filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
+      `Storage of ${proofType.filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
     );
   }
 }
 
-export const downloadProofFiles = async function (filename: string) {
+export const downloadProofFiles = async function (proofType: Proof) {
   const zkeySuffix = ["b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
   const filePromises = [];
   for (const c of zkeySuffix) {
-    const item = await localforage.getItem(`${filename}.zkey${c}`);
+    const item = await localforage.getItem(`${proofType.filename}.zkey${c}`);
     if (item) {
-      console.log(`${filename}.zkey${c} already exists!`);
+      console.log(`${proofType.filename}.zkey${c} already exists!`);
       continue;
     }
-    filePromises.push(downloadFromFilename(`${filename}.zkey${c}`));
+    filePromises.push(
+      downloadFromFilename(`${proofType.filename}.zkey${c}`, proofType)
+    );
   }
   await Promise.all(filePromises);
 };
 
-export async function generateProof(input: any, filename: string) {
-  // TODO: figure out how to generate this s.t. it passes build
+export async function generateProof(input: any, proofType: Proof) {
   console.log("generating proof for input");
   console.log(input);
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     input,
-    `../${filename}.wasm`,
-    `${filename}.zkey`
+    `../${proofType.filename}.wasm`,
+    `${proofType.filename}.zkey`
   );
   console.log(`Generated proof ${JSON.stringify(proof)}`);
 
@@ -56,9 +55,13 @@ export async function generateProof(input: any, filename: string) {
   };
 }
 
-export async function verifyProof(proof: any, publicSignals: any) {
+export async function verifyProof(
+  proof: any,
+  publicSignals: any,
+  proofType: Proof
+) {
   const proofVerified = await snarkjs.groth16.verify(
-    vkey,
+    JSON.parse(proofType.vkey),
     publicSignals,
     proof
   );
@@ -66,7 +69,7 @@ export async function verifyProof(proof: any, publicSignals: any) {
   return proofVerified;
 }
 
-function bigIntToArray(n: number, k: number, x: bigint) {
+export function bigIntToArray(n: number, k: number, x: bigint) {
   let divisor = 1n;
   for (var idx = 0; idx < n; idx++) {
     divisor = divisor * 2n;
@@ -106,21 +109,26 @@ function sigToRSArrays(sig: string) {
 }
 
 export function buildInput(
+  proofType: Proof,
   merkleTree: MerkleTree,
   address: string,
   pubkey: string,
   msghash: string,
   sig: string
 ) {
-  const [r, s] = sigToRSArrays(sig);
+  if (proofType!.definition === "ECDSA-secp256k1") {
+    const [r, s] = sigToRSArrays(sig);
 
-  return {
-    root: merkleTree.root,
-    pathElements: merkleTree.leafToPathElements[address],
-    pathIndices: merkleTree.leafToPathIndices[address],
-    r: r,
-    s: s,
-    msghash: bigIntToArray(64, 4, BigInt(msghash)),
-    pubkey: pubkeyToXYArrays(pubkey),
-  };
+    return {
+      root: merkleTree.root,
+      pathElements: merkleTree.leafToPathElements[address],
+      pathIndices: merkleTree.leafToPathIndices[address],
+      r: r,
+      s: s,
+      msghash: bigIntToArray(64, 4, BigInt(msghash)),
+      pubkey: pubkeyToXYArrays(pubkey),
+    };
+  } else {
+    return {};
+  }
 }

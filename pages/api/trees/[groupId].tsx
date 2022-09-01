@@ -1,19 +1,46 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import fs from "fs";
-import path from "path";
+import prisma from "../../../lib/prisma";
+import { MerkleTree } from "../../../lib/merkleTree";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   let { groupId } = req.query;
-  const filename = `${groupId}.json`;
-  try {
-    const filePath = path.resolve("./pages/api/trees", filename);
-    const buffer = fs.readFileSync(filePath);
-    const data = JSON.parse(buffer.toString());
-    res.status(200).json(data);
-  } catch (e) {
-    res.status(404).json({ error: "File not found" });
+
+  const group = await prisma.group.findUnique({
+    where: {
+      abbr_name: groupId.toString(),
+    },
+    include: {
+      leaves: {
+        include: {
+          user: true,
+        },
+      },
+      proof: true,
+      credential: {
+        select: {
+          twitter_account: true,
+        },
+      },
+    },
+  });
+
+  if (group === null) {
+    res.status(404).json({ error: "Group not found" });
+    return;
   }
+
+  let leafToPathElements: { [address: string]: string[] } = {};
+  let leafToPathIndices: { [address: string]: string[] } = {};
+
+  for (const leaf of group.leaves) {
+    leafToPathElements[leaf.user.key] = leaf.path;
+    leafToPathIndices[leaf.user.key] = leaf.indices;
+  }
+
+  group.leaves = [];
+
+  res.status(200).json({ ...group, leafToPathElements, leafToPathIndices });
 }
