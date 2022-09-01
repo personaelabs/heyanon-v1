@@ -7,7 +7,7 @@ import { Proof } from "@prisma/client";
 const localforage = require("localforage");
 const snarkjs = require("snarkjs");
 
-async function downloadFromFilename(proofType: Proof, filename: string) {
+async function downloadFromFilename(filename: string, proofType: Proof) {
   const link = proofType.zkey_link + filename;
   try {
     const zkeyResp = await fetch(link, {
@@ -15,7 +15,7 @@ async function downloadFromFilename(proofType: Proof, filename: string) {
     });
     const zkeyBuff = await zkeyResp.arrayBuffer();
     await localforage.setItem(filename, zkeyBuff);
-    console.log(`Storage of ${proofType.filename} successful!`);
+    console.log(`Storage of ${filename} successful!`);
   } catch (e) {
     console.log(
       `Storage of ${proofType.filename} unsuccessful, make sure IndexedDB is enabled in your browser.`
@@ -33,7 +33,7 @@ export const downloadProofFiles = async function (proofType: Proof) {
       continue;
     }
     filePromises.push(
-      downloadFromFilename(proofType, `${proofType.filename}.zkey${c}`)
+      downloadFromFilename(`${proofType.filename}.zkey${c}`, proofType)
     );
   }
   await Promise.all(filePromises);
