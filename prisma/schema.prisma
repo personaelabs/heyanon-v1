@@ -62,10 +62,11 @@ model Proof {
   id           Int     @id @default(autoincrement())
   definition   String?
   path_length  Int?
-  vkey         String?
-  zkey_link    String?
+  vkey         String
+  zkey_link    String
   circuit_link String?
   vkey_address String?
+  filename     String
 
   groups Group[]
 }

@@ -30,8 +30,6 @@ async function main() {
       },
     });
 
-    console.log(credential);
-
     if (!credential) {
       credential = await prisma.credential.create({
         data: {

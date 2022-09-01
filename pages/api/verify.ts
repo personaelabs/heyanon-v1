@@ -74,6 +74,7 @@ export default async function handler(
     },
     include: {
       credential: true,
+      proof: true,
     },
   });
 
@@ -87,7 +88,7 @@ export default async function handler(
     return;
   }
 
-  if (!verifyProof(proof, publicSignals)) {
+  if (!verifyProof(proof, publicSignals, group.proof)) {
     console.log(`Failed verification for proof ${proof}`);
     res.status(400).send("Failed proof verification");
     return;

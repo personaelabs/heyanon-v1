@@ -76,9 +76,9 @@ const PostMsgPage = () => {
       }
 
       if (groupId === "daohack") {
-        treeFromCloudfront("daohack.json").then((tree) => {
+        treeFromCloudfront("daohack.json").then((tree: MerkleTree) => {
           setMerkleTree(tree);
-          setGroupName(tree.groupName);
+          setGroupName(tree.full_name);
           setRoot(tree.root);
           setStage(Stage.WALLET);
         });
@@ -163,6 +163,7 @@ const PostMsgPage = () => {
       }
 
       const input = buildInput(
+        merkleTree.proof,
         merkleTree,
         BigInt(address).toString(),
         pubkey,
@@ -183,10 +184,13 @@ const PostMsgPage = () => {
       setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Downloading proving key");
-      await downloadProofFiles(filename);
+      await downloadProofFiles(merkleTree.proof);
 
       setLoadingMessage("Generating proof");
-      const { proof, publicSignals } = await generateProof(input, filename);
+      const { proof, publicSignals } = await generateProof(
+        input,
+        merkleTree.proof
+      );
 
       setProof(proof);
       setPublicSignals(publicSignals);

@@ -40,5 +40,7 @@ export default async function handler(
     leafToPathIndices[leaf.user.key] = leaf.indices;
   }
 
+  group.leaves = [];
+
   res.status(200).json({ ...group, leafToPathElements, leafToPathIndices });
 }
