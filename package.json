@@ -15,6 +15,8 @@
     "@headlessui/react": "^1.6.4",
     "@heroicons/react": "^1.0.6",
     "@prisma/client": "^4.2.1",
+    "@semaphore-protocol/group": "^2.0.0",
+    "@semaphore-protocol/identity": "^2.0.0",
     "@types/got": "9.6.12",
     "@types/jest": "^29.0.0",
     "airtable": "^0.11.4",
