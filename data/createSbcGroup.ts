@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { sbcSecrets } from "./sbcSecrets";
+// import { sbcSecrets } from "./sbcSecrets";
 import { Group } from "@semaphore-protocol/group";
 import { Identity } from "@semaphore-protocol/identity";
 import { poseidon } from "circomlibjs";
@@ -9,6 +9,8 @@ const prisma = new PrismaClient();
 async function main() {
   // create identities + groups
   const identityCommitments: string[] = [];
+
+  const sbcSecrets: string[] = [];
 
   for (let i = 0; i < 200; i++) {
     const identity = new Identity(sbcSecrets[i]);
