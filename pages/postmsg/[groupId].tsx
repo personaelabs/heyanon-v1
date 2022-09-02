@@ -89,7 +89,7 @@ const PostMsgPage = () => {
           setStage(Stage.INVALID);
           return;
         }
-        setIsModerated(groupId.length >= 3 && groupId.slice(-3) === "mod");
+        setIsModerated(respData.moderation_status !== "NONE");
         setMerkleTree(respData);
         setGroupName(respData.full_name);
         setRoot(respData.root);
@@ -106,9 +106,6 @@ const PostMsgPage = () => {
       const addr = await signer.getAddress();
       console.log(`Connected address: ${addr}`);
       setAddress(addr);
-
-      console.log(Object.keys(merkleTree!.leafToPathElements));
-      console.log(BigInt(addr).toString());
 
       if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
         setStage(Stage.NEWADDRESS);
@@ -155,8 +152,6 @@ const PostMsgPage = () => {
   };
 
   const genProof = () => {
-    let filename = "dizkus_64_4_30";
-
     const genProofAsync = async () => {
       if (!merkleTree) {
         return;

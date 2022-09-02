@@ -10,6 +10,7 @@ module.exports = {
       heyanonred: "#d12b38",
       heyanonyellow: "#f2c43e",
       heyanonblack: "#2a2c2e",
+      heyanonpurple: "#AF69EF",
     },
   },
   plugins: [],

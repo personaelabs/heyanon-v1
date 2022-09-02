@@ -11,7 +11,7 @@ model Group {
   id                Int       @id @default(autoincrement())
   root              String
   approved          Boolean   @default(false)
-  abbr_name         String  @unique
+  abbr_name         String    @unique
   full_name         String
   how_generated     String
   moderation_status ModStatus
@@ -27,16 +27,19 @@ model Group {
   parent_group    Group?  @relation("Subgroup", fields: [parent_group_id], references: [id])
   child_groups    Group[] @relation("Subgroup")
 
-  credential_id Int     
-  credential Credential @relation(fields: [credential_id], references: [id])
+  credential_id Int
+  credential    Credential @relation(fields: [credential_id], references: [id])
 
-  leaves     Leaf[]
-  posts      Post[]
+  leaves Leaf[]
+  posts  Post[]
+
+  ext_nullifier String?
+  nullifiers     Nullifier[]
 }
 
 model Leaf {
-  id       Int      @id @default(autoincrement())
-  path     String[]
+  id      Int      @id @default(autoincrement())
+  path    String[]
   indices String[]
 
   user_id Int
@@ -48,12 +51,16 @@ model Leaf {
 
 model Post {
   id        Int     @id @default(autoincrement())
-  msg       String?
-  msg_hash  String?
+  msg       String
+  msg_hash  String
   ipfs_hash String?
+  tweet_id  String?
 
   group_id Int
   group    Group @relation(fields: [group_id], references: [id])
+
+  nullifier_id Int?
+  nullifier    Nullifier? @relation(fields: [nullifier_id], references: [id])
 
   votes Vote[]
 }
@@ -73,12 +80,22 @@ model Proof {
 
 model User {
   id         Int     @id @default(autoincrement())
-  key        String @unique
+  key        String  @unique
   site_admin Boolean
-  reputation Int?
 
   leaves Leaf[]
-  votes  Vote[]
+}
+
+model Nullifier {
+  id         Int    @id @default(autoincrement())
+  value      String
+  reputation Int?   @default(0)
+
+  group_id Int
+  group    Group @relation(fields: [group_id], references: [id])
+
+  posts Post[]
+  votes Vote[]
 }
 
 model Vote {
@@ -88,20 +105,20 @@ model Vote {
   post_id Int
   post    Post @relation(fields: [post_id], references: [id])
 
-  user_id Int?
-  user    User? @relation(fields: [user_id], references: [id])
+  nullifier_id Int
+  nullifier    Nullifier @relation(fields: [nullifier_id], references: [id])
 }
 
 model Credential {
   id Int @id @default(autoincrement())
 
-  twitter_account      String @unique
+  twitter_account      String  @unique
   twit_consumer_key    String?
   twit_consumer_secret String?
   twit_access_token    String?
   twit_access_secret   String?
 
-  groups    Group[] 
+  groups Group[]
 }
 
 enum ModStatus {
