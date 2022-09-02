@@ -40,3 +40,7 @@ yarn.lock
 
 # snarkjs browser payload
 *.zkey
+
+# data for semaphore groups
+/data/sbcSecrets.ts
+/data/sbcSecrets*.csv

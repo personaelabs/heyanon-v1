@@ -34,7 +34,7 @@ model Group {
   posts  Post[]
 
   ext_nullifier String?
-  Nullifier     Nullifier[]
+  nullifiers     Nullifier[]
 }
 
 model Leaf {
@@ -54,6 +54,7 @@ model Post {
   msg       String
   msg_hash  String
   ipfs_hash String?
+  tweet_id  String?
 
   group_id Int
   group    Group @relation(fields: [group_id], references: [id])

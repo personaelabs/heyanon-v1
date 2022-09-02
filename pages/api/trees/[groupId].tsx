@@ -18,6 +18,7 @@ export default async function handler(
           user: true,
         },
       },
+      nullifiers: true,
       proof: true,
       credential: {
         select: {

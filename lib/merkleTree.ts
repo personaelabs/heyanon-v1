@@ -9,6 +9,7 @@ export type MerkleTree = Prisma.GroupGetPayload<{
         user: true;
       };
     };
+    nullifiers: true;
     proof: true;
     credential: {
       select: {
