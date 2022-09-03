@@ -17,6 +17,8 @@ import { MerkleTree } from "../../lib/merkleTree";
 import { Identity } from "@semaphore-protocol/identity";
 import { poseidon } from "circomlibjs";
 
+import { HashedData, reputationToRoleText } from "../../lib/sbcUtils";
+
 // tweet size minus ipfs hash length, '\n\nheyanon.xyz/verify/', and '#XXXX '
 // chose 250 to be sure of no message overflows
 const MAX_MESSAGE_LENGTH = 250 - 75 - 6;
@@ -89,9 +91,9 @@ const PostMsgPage = () => {
       setMerkleTree(respData);
       setGroupName(respData.full_name);
       setRoot(respData.root);
-      setStage(Stage.SPELLTYPE);
       setIdc(artifactIdc);
       setPubNullifier(artifactPubNullifier);
+      setStage(Stage.SPELLTYPE);
 
       let nullifierRep: number = 0;
       for (const nullifier of respData.nullifiers) {
@@ -105,62 +107,6 @@ const PostMsgPage = () => {
     getMerkleTree();
   }, [artifact]);
 
-  const reputationToRoleText = (reputation: number) => {
-    if (reputation < 100) {
-      return "an Apprentice";
-    } else if (reputation < 200) {
-      return "a Wizard";
-    } else if (reputation < 300) {
-      return "a Grand Wizard";
-    } else {
-      return "a Sorcerer";
-    }
-  };
-
-  const reputationToRole = () => {
-    if (reputation < 100) {
-      return (
-        <>
-          an{" "}
-          <u>
-            <strong>Apprentice</strong>
-          </u>
-          .
-        </>
-      );
-    } else if (reputation < 200) {
-      return (
-        <>
-          a{" "}
-          <u>
-            <strong>Wizard</strong>
-          </u>
-          !
-        </>
-      );
-    } else if (reputation < 300) {
-      return (
-        <>
-          a{" "}
-          <u>
-            <strong>Grand Wizard</strong>
-          </u>
-          !
-        </>
-      );
-    } else {
-      return (
-        <>
-          a{" "}
-          <u>
-            <strong>Sorcerer</strong>
-          </u>
-          !!
-        </>
-      );
-    }
-  };
-
   const castMessage = () => {
     const genProofAsync = async () => {
       if (!merkleTree) {
@@ -169,7 +115,7 @@ const PostMsgPage = () => {
 
       const userId = new Identity(artifact!.toString());
 
-      const hashedData = {
+      const hashedData: HashedData = {
         msg,
         replyId,
         pubNullifier,
@@ -294,6 +240,19 @@ const PostMsgPage = () => {
               <div className="mb-5">
                 {stage === Stage.SPELLTYPE && (
                   <div className="flex flex-col justify-center text-center">
+                    <Button className="mb-5">
+                      <a
+                        href={`https://twitter.com/TheZKGuild`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          color: "black",
+                        }}
+                      >
+                        View feed
+                      </a>
+                    </Button>
+
                     <Button
                       className="mb-5"
                       onClick={() => {
@@ -322,8 +281,10 @@ const PostMsgPage = () => {
                     >
                       Upvote
                     </Button>
-                    {/* <div>{`Your mana: ${reputation}`}</div> */}
-                    <div>Casting as {reputationToRole()}</div>
+
+                    <div>
+                      Casting as <u>{reputationToRoleText(reputation)}</u>
+                    </div>
                   </div>
                 )}
                 {stage === Stage.MESSAGE && (
@@ -391,13 +352,17 @@ const PostMsgPage = () => {
                 {stage === Stage.SUCCESS && (
                   <div className="flex flex-col justify-center text-center">
                     <div className="mb-2">
-                      <a href={`${tweetLink}`}>
+                      <a href={`${tweetLink}`} target="_blank" rel="noreferrer">
                         <u>Link to tweet</u>
                       </a>
                     </div>
                     <div className="mb-2">
                       Join our{" "}
-                      <a href={"https://discord.gg/kmKAC5T6sV"}>
+                      <a
+                        href={"https://discord.gg/kmKAC5T6sV"}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         <u>discord!</u>
                       </a>
                     </div>

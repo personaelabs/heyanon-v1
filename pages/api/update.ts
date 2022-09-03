@@ -4,30 +4,10 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof, bigIntToArray } from "../../lib/zkp";
-import { MerkleTree } from "../../lib/merkleTree";
-import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
+import { verifyProof } from "../../lib/zkp";
 import prisma from "../../lib/prisma";
 import { generateSignalHash } from "../../lib/semaphore";
-
-type HashedData = {
-  msg: string;
-  msgType: "MESSAGE" | "REPLY" | "UPVOTE";
-  replyId: string | null;
-  pubNullifier: string;
-};
-
-const reputationToRoleText = (reputation: number) => {
-  if (reputation < 100) {
-    return "An Apprentice";
-  } else if (reputation < 200) {
-    return "A Wizard";
-  } else if (reputation < 300) {
-    return "A Grand Wizard";
-  } else {
-    return "A Sorcerer";
-  }
-};
+import { HashedData, reputationToRoleText } from "../../lib/sbcUtils";
 
 /**
  * Verifies that the public signals corresponding to a submitted proof are consistent with the parameters in a request body
