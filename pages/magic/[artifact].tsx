@@ -240,13 +240,15 @@ const PostMsgPage = () => {
               <div className="mb-5">
                 {stage === Stage.SPELLTYPE && (
                   <div className="flex flex-col justify-center text-center">
-                    <a
-                      href={`https://twitter.com/TheZKGuild`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Button className="mb-5">View feed</Button>
-                    </a>
+                    <Button className="mb-5">
+                      <a
+                        href={`https://twitter.com/TheZKGuild`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View feed
+                      </a>
+                    </Button>
 
                     <Button
                       className="mb-5"
@@ -276,7 +278,8 @@ const PostMsgPage = () => {
                     >
                       Upvote
                     </Button>
-                    {/* <div>{`Your mana: ${reputation}`}</div> */}
+
+                    <div>Casting as {reputationToRoleText(reputation)}</div>
                   </div>
                 )}
                 {stage === Stage.MESSAGE && (
