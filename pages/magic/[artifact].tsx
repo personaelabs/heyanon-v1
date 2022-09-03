@@ -245,6 +245,9 @@ const PostMsgPage = () => {
                         href={`https://twitter.com/TheZKGuild`}
                         target="_blank"
                         rel="noreferrer"
+                        style={{
+                          color: "black",
+                        }}
                       >
                         View feed
                       </a>
@@ -279,7 +282,9 @@ const PostMsgPage = () => {
                       Upvote
                     </Button>
 
-                    <div>Casting as {reputationToRoleText(reputation)}</div>
+                    <div>
+                      Casting as <u>{reputationToRoleText(reputation)}</u>
+                    </div>
                   </div>
                 )}
                 {stage === Stage.MESSAGE && (
