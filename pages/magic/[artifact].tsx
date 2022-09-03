@@ -26,7 +26,6 @@ const MAX_MESSAGE_LENGTH = 250 - 75 - 6;
 enum Stage {
   CONNECTING = "Retreiving group",
   INVALIDART = "Invalid artifact :(",
-  PREVIEW = "The feed",
   SPELLTYPE = "Cast a spell",
   MESSAGE = "Post a message",
   REPLY = "Reply to a message",
@@ -94,7 +93,7 @@ const PostMsgPage = () => {
       setRoot(respData.root);
       setIdc(artifactIdc);
       setPubNullifier(artifactPubNullifier);
-      setStage(Stage.PREVIEW);
+      setStage(Stage.SPELLTYPE);
 
       let nullifierRep: number = 0;
       for (const nullifier of respData.nullifiers) {
@@ -194,11 +193,6 @@ const PostMsgPage = () => {
           <title>heyanon!</title>
           <link rel="icon" href="/heyanon.ico" />
           <script async src="snarkjs.min.js"></script>
-          <script
-            async
-            src="https://platform.twitter.com/widgets.js"
-            charSet="utf-8"
-          ></script>
         </Head>
 
         <Slideover
@@ -244,26 +238,16 @@ const PostMsgPage = () => {
               </div>
 
               <div className="mb-5">
-                {stage === Stage.PREVIEW && (
-                  <div className="flex flex-col justify-center text-center">
-                    <Button
-                      className="mb-5"
-                      onClick={() => {
-                        setStage(Stage.SPELLTYPE);
-                      }}
-                    >
-                      Cast a spell
-                    </Button>
-                    <a
-                      className="twitter-timeline"
-                      href="https://twitter.com/TheZKGuild?ref_src=twsrc%5Etfw"
-                    >
-                      Tweets by TheZKGuild
-                    </a>{" "}
-                  </div>
-                )}
                 {stage === Stage.SPELLTYPE && (
                   <div className="flex flex-col justify-center text-center">
+                    <a
+                      href={`https://twitter.com/TheZKGuild`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button className="mb-5">View feed</Button>
+                    </a>
+
                     <Button
                       className="mb-5"
                       onClick={() => {
