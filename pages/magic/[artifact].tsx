@@ -194,6 +194,11 @@ const PostMsgPage = () => {
           <title>heyanon!</title>
           <link rel="icon" href="/heyanon.ico" />
           <script async src="snarkjs.min.js"></script>
+          <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charSet="utf-8"
+          ></script>
         </Head>
 
         <Slideover
@@ -240,7 +245,7 @@ const PostMsgPage = () => {
 
               <div className="mb-5">
                 {stage === Stage.PREVIEW && (
-                  <>
+                  <div className="flex flex-col justify-center text-center">
                     <Button
                       className="mb-5"
                       onClick={() => {
@@ -255,33 +260,10 @@ const PostMsgPage = () => {
                     >
                       Tweets by TheZKGuild
                     </a>{" "}
-                    <script
-                      async
-                      src="https://platform.twitter.com/widgets.js"
-                      charSet="utf-8"
-                    ></script>
-                  </>
+                  </div>
                 )}
                 {stage === Stage.SPELLTYPE && (
                   <div className="flex flex-col justify-center text-center">
-                    <Button
-                      className="mb-5"
-                      onClick={() => {
-                        setStage(Stage.MESSAGE);
-                        setMsgType("MESSAGE");
-                      }}
-                    >
-                      Post
-                    </Button>
-                    <Button
-                      className="mb-5"
-                      onClick={() => {
-                        setStage(Stage.MESSAGE);
-                        setMsgType("MESSAGE");
-                      }}
-                    >
-                      Post
-                    </Button>
                     <Button
                       className="mb-5"
                       onClick={() => {
