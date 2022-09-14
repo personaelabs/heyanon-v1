@@ -119,6 +119,17 @@ const PostMsgPage = () => {
     connectToMetamaskAsync();
   };
 
+  const parseReplyId = (replyTweetLink: string) => {
+    setReplyId(null);
+    const linkRegex = /.*twitter.com\/.*\/(\d*)/g;
+    const matches = linkRegex.exec(replyTweetLink);
+    if (!matches) {
+      return;
+    }
+    console.log(matches![1]);
+    setReplyId(matches[1]);
+  };
+
   const signMessage = () => {
     const signMessageAsync = async () => {
       const signature = await eip712Sign(signer, msgType!, msg);
@@ -336,31 +347,22 @@ const PostMsgPage = () => {
                       <br />
                     </div>
 
-                    <br />
                     {msgType === "reply" && (
-                      <div>
-                        <textarea
-                          rows={4}
-                          name="replyId"
-                          id="replyId"
-                          className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
-                          placeholder={"Enter tweet ID to reply to..."}
-                          onChange={(e) => setReplyId(e.target.value)}
-                        />
-                      </div>
-                    )}
+                      <>
+                        <br />
 
-                    <br />
-
-                    {msgType !== null &&
-                      (msgType === "post" || replyId !== null) && (
-                        // TODO: disable when replyId is empty
                         <div>
-                          <Button onClick={() => setStage(Stage.TWEET)}>
-                            Next
-                          </Button>
+                          <textarea
+                            rows={4}
+                            name="replyTweetLink"
+                            id="replyTweetLink"
+                            className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
+                            placeholder={"Enter full tweet link to reply to..."}
+                            onChange={(e) => parseReplyId(e.target.value)}
+                          />
                         </div>
-                      )}
+                      </>
+                    )}
                   </div>
                 )}
                 {stage === Stage.TWEET && (
@@ -442,6 +444,16 @@ const PostMsgPage = () => {
                 {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
                   <Button onClick={connectToMetamask}>Connect Metamask</Button>
                 )}
+                {stage === Stage.MSGTYPE &&
+                  msgType !== null &&
+                  (msgType === "post" || replyId !== null) && (
+                    // TODO: disable when replyId is empty
+                    <div>
+                      <Button onClick={() => setStage(Stage.TWEET)}>
+                        Next
+                      </Button>
+                    </div>
+                  )}
                 {stage === Stage.TWEET && (
                   <Button
                     disabled={
