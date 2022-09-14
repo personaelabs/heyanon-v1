@@ -44,10 +44,12 @@ const Home: NextPage = () => {
                   anonymously on Twitter. These feeds are curated by the
                   <a href="https://twitter.com/heyanonxyz"> @heyanonxyz </a>
                   account, such as the{" "}
-                  <a href="https://twitter.com/DAOHackGossip">DAO hack</a> feed.
-                  Anyone whose participation in a group or historical moment can
-                  be verified and then post to the feed. The magic is that you
-                  don’t need to reveal your address when you do.
+                  <a href="https://twitter.com/EthereumOGs">
+                    @EthereumOGs
+                  </a>{" "}
+                  feed. Anyone whose participation in a group or historical
+                  moment can be verified and then post to the feed. The magic is
+                  that you don’t need to reveal your address when you do.
                   <br />
                   <br />
                   <em>Not even to the site admins.</em>

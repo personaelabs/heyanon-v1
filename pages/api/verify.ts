@@ -104,21 +104,21 @@ export default async function handler(
   const cid = await postToIpfs(ipfsData);
   console.log(`Posted to ipfs: ${cid.toString()}`);
 
+  const tweetText =
+    group.joint_name === null
+      ? `${eip712Value.contents}
+  
+heyanon.xyz/verify/${cid.toString()}`
+      : `${group.joint_name}
+
+${eip712Value.contents}
+
+heyanon.xyz/verify/${cid.toString()}`;
+
   const tweetURL =
     eip712Value.type === "post"
-      ? await postTweet(
-          `${eip712Value.contents}
-  
-heyanon.xyz/verify/${cid.toString()}`,
-          group.credential
-        )
-      : await postTweet(
-          `${eip712Value.contents}
-  
-heyanon.xyz/verify/${cid.toString()}`,
-          group.credential,
-          replyId
-        );
+      ? await postTweet(tweetText, group.credential)
+      : await postTweet(tweetText, group.credential, replyId);
 
   res.status(200).json({ ipfsHash: cid.toString(), tweetURL: tweetURL });
 }
