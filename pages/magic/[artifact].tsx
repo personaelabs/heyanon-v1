@@ -4,8 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { Title, Button } from "../../components/Base";
-import { InfoTooltip, Tooltip } from "../../components/Tooltip";
-import InfoRow from "../../components/InfoRow";
 import Slideover from "../../components/Slideover";
 import { ClipLoader } from "react-spinners";
 import dynamic from "next/dynamic";

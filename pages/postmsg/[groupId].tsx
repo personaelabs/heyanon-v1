@@ -17,8 +17,8 @@ import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
 import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
-// tweet size minus ipfs hash length and '\nheyanon.xyz/verify/'
-const MAX_MESSAGE_LENGTH = 280 - 73;
+// tweet size minus ipfs hash length and '\n\nheyanon.xyz/verify/'
+const MAX_MESSAGE_LENGTH = 280 - 75;
 
 enum Stage {
   CONNECTING = "Retreiving group",
@@ -47,11 +47,11 @@ const PostMsgPage = () => {
   const [signer, setSigner] = useState<any | null>(null);
   const [address, setAddress] = useState<string>("");
 
+  const [jointPrefix, setJointPrefix] = useState<string>("");
   const [msg, setMsg] = useState<string>("");
   const [sig, setSig] = useState<string>("");
 
   const [eip712Value, setEip712Value] = useState<EIP712Value>();
-
   const [msghash, setMsghash] = useState<string>("");
   const [pubkey, setPubkey] = useState<string>("");
 
@@ -92,6 +92,9 @@ const PostMsgPage = () => {
         setIsModerated(respData.moderation_status !== "NONE");
         setMerkleTree(respData);
         setGroupName(respData.full_name);
+        setJointPrefix(
+          respData.joint_name === null ? "" : respData.joint_name + "\n\n"
+        );
         setRoot(respData.root);
         setStage(Stage.WALLET);
       }
@@ -444,12 +447,12 @@ const PostMsgPage = () => {
                     disabled={
                       msg === null ||
                       msg.length === 0 ||
-                      msg.length > MAX_MESSAGE_LENGTH
+                      msg.length > MAX_MESSAGE_LENGTH - jointPrefix.length
                     }
                     onClick={signMessage}
                     className="disabled:opacity-50"
                   >
-                    {msg.length > MAX_MESSAGE_LENGTH
+                    {msg.length > MAX_MESSAGE_LENGTH - jointPrefix.length
                       ? "Message too long"
                       : "Sign"}
                   </Button>

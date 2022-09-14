@@ -19,6 +19,7 @@ model Group {
   why_useful        String
   static            Boolean
   last_update       DateTime  @default(now())
+  joint_name        String?
 
   proof_id Int
   proof    Proof @relation(fields: [proof_id], references: [id])
