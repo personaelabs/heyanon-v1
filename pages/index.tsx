@@ -105,7 +105,7 @@ const Home: NextPage = () => {
                   Follow{" "}
                   <a href="https://twitter.com/heyanonxyz">@heyanonxyz</a> for
                   updates and new message feeds. Join our{" "}
-                  <a href="https://discord.gg/4J3XzZJf">discord</a> for misc.
+                  <a href="https://discord.gg/kmKAC5T6sV">discord</a> for misc.
                   discussion.
                 </div>
               </div>
