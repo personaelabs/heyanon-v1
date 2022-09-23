@@ -72,7 +72,7 @@ const Home: NextPage = () => {
                   via the specified event feed bot. The message has with it a
                   verify link that twitter readers can use to inspect the proof
                   themselves. For more, check out our circuits and code at
-                  <a href="https://github.com/dizkus"> github</a>.
+                  <a href="https://github.com/personaelabs"> github</a>.
                 </div>
               </div>
 
