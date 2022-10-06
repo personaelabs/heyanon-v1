@@ -1,3 +1,7 @@
+<div align="center">
+        <img width="200" alt="heyanon icon." src="https://github.com/personaelabs/heyanon/blob/main/public/logo.svg">
+</div>
+
 ## What is this site?
 
 heyanon is a way for people who are in cool groups or did cool stuff on Ethereum to broadcast messages anonymously on Twitter. These feeds are curated by the [@heyanonxyz](https://twitter.com/heyanonxyz) account, such as the [Ethereum OGs](https://twitter.com/EthereumOGs). Anyone whose participation in a group or historical moment can be verified and then post to the feed. The magic is that you don’t need to reveal your address when you do.
@@ -19,12 +23,4 @@ npm run dev
 
 Set up a PostgreSQL DB according to the schema in prisma/schema.prisma, and set the `DATABASE_URL` variable in your `.env` file.
 
-Circuits are [here](https://github.com/personaelabs/circuits)
-
-Data generation is [here](https://github.com/personaelabs/data)
-
-For further discussion, join our discord at discord.gg/kmKAC5T6sV
-=======
-Circuits are [here](https://github.com/personaelabs/circuits)
-
-Data generation is [here](https://github.com/personaelabs/data)
+Circuits are [here](https://github.com/personaelabs/circuits). Data generation is [here](https://github.com/personaelabs/data). And for further discussion, join our [discord](https://discord.gg/kmKAC5T6sV)!
