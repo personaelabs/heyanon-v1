@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient, Proof } from "@prisma/client";
 
 const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
 
@@ -20,6 +20,13 @@ export type MerkleTree = Prisma.GroupGetPayload<{
 }> & {
   leafToPathElements: { [address: string]: string[] };
   leafToPathIndices: { [address: string]: string[] };
+};
+
+export type TAZMerkleTree = {
+  ext_nullifier: string;
+  leafToPathElements: { [address: string]: string[] };
+  leafToPathIndices: { [address: string]: string[] };
+  proof: Proof;
 };
 
 export async function treeFromCloudfront(filename: string) {

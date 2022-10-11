@@ -41,7 +41,7 @@ async function main() {
         why_useful: "MVP of in-person heyanon groups",
         static: true,
         proof_id: 2,
-        credential_id: 5, // use heyanontest initially
+        credential_id: 5,
         ext_nullifier: "123",
       },
     });
