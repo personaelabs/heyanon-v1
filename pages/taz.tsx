@@ -3,31 +3,33 @@ import Head from "next/head";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { Title, Button } from "../../components/Base";
-import Slideover from "../../components/Slideover";
+import { Title, Button } from "../components/Base";
+import Slideover from "../components/Slideover";
 import { ClipLoader } from "react-spinners";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { generateSignalHash } from "../../lib/semaphore";
-import { generateProof, downloadProofFiles } from "../../lib/zkp";
-import { MerkleTree } from "../../lib/merkleTree";
-import { Identity } from "@semaphore-protocol/identity";
+import { generateSignalHash } from "../lib/semaphore";
+import { generateProof, downloadProofFiles } from "../lib/zkp";
+import { MerkleTree } from "../lib/merkleTree";
 import { poseidon } from "circomlibjs";
+import { Identity } from "@semaphore-protocol/identity";
+import { Subgraph } from "@semaphore-protocol/subgraph";
+import { Group } from "@semaphore-protocol/group";
 
-import { HashedData, reputationToRoleText } from "../../lib/sbcUtils";
+import { HashedData } from "../lib/tazUtils";
 
-// tweet size minus ipfs hash length, '\n\nheyanon.xyz/verify/', and '#XXXX '
+// tweet size minus verify message '\n\nheyanon.xyz/verify/IPFSHASH'
 // chose 250 to be sure of no message overflows
-const MAX_MESSAGE_LENGTH = 250 - 75 - 6;
+const MAX_MESSAGE_LENGTH = 250 - 75;
 
 enum Stage {
   CONNECTING = "Retreiving group",
-  INVALIDART = "Invalid artifact :(",
+  INVALIDART = "Invalid ID, reload in 2 min",
+  GOTOTAZ = "Invalid URL, return to TAZ",
   SPELLTYPE = "Cast a spell",
-  MESSAGE = "Post a message",
-  REPLY = "Reply to a message",
-  UPVOTE = "Upvote a message",
+  MESSAGE = "Post a tweet",
+  REPLY = "Reply to any tweet",
   INPROGRESS = "Magic is happening",
   SUBMIT = "Spell complete!",
   SUCCESS = "Success!",
@@ -35,21 +37,18 @@ enum Stage {
 
 const PostMsgPage = () => {
   const router = useRouter();
-  const { artifact } = router.query;
 
   const [stage, setStage] = useState<Stage>(Stage.CONNECTING);
   const [merkleTree, setMerkleTree] = useState<MerkleTree>();
 
   const [idc, setIdc] = useState<string>("");
-  const [reputation, setReputation] = useState<number>(0);
   const [pubNullifier, setPubNullifier] = useState<string>("");
-  const [tweetFooter, setTweetFooter] = useState<string>("");
+  const [zkIdentity, setZKIdentity] = useState<Identity | null>(null);
 
   const [msg, setMsg] = useState<string>("");
-  const [msgType, setMsgType] = useState<"MESSAGE" | "REPLY" | "UPVOTE">(
-    "MESSAGE"
-  );
-  const [replyId, setReplyId] = useState<string | null>(null);
+  const [msgType, setMsgType] = useState<"MESSAGE" | "REPLY">("MESSAGE");
+  const [replyTweetId, setReplyTweetId] = useState<string | null>(null);
+  const [submitPending, setSubmitPending] = useState<boolean>(false);
 
   const [loadingMessage, setLoadingMessage] = useState<string>("");
   const [proof, setProof] = useState(null);
@@ -64,42 +63,80 @@ const PostMsgPage = () => {
 
   useEffect(() => {
     async function getMerkleTree() {
-      if (!artifact) {
-        return;
-      }
-
-      const resp = await fetch(`/api/trees/sbc`);
+      // get our metadata
+      const resp = await fetch(`/api/trees/taz`);
       const respData: MerkleTree = await resp.json();
 
-      const artifactIdc = new Identity(artifact.toString())
-        .generateCommitment()
-        .toString();
+      // get subgraph group
+      const subgraph = new Subgraph("goerli");
+      const subgraphGroup = await subgraph.getGroup("10807", {
+        members: true,
+      });
+      let groupObj = new Group(parseInt(subgraphGroup.merkleTree.depth));
+      groupObj.addMembers(subgraphGroup.members);
+
+      for (const member of subgraphGroup.members) {
+        const merkleProof = groupObj.generateProofOfMembership(
+          groupObj.indexOf(BigInt(member))
+        );
+        respData.leafToPathElements[member] = merkleProof.siblings.map((el) =>
+          el.toString()
+        );
+        respData.leafToPathIndices[member] = merkleProof.pathIndices.map((el) =>
+          el.toString()
+        );
+      }
+
+      // get identity
+      let serializedIdentity;
+      if (window.location.hash.length !== 0) {
+        if (window.location.hash.slice(1).split("_").length !== 2) {
+          setStage(Stage.GOTOTAZ);
+          return;
+        }
+        const [nullifier, trapdoor] = window.location.hash.slice(1).split("_");
+        serializedIdentity = JSON.stringify([nullifier, trapdoor]);
+      } else {
+        if (localStorage.getItem("serializedIdentity") === null) {
+          setStage(Stage.GOTOTAZ);
+          return;
+        }
+        serializedIdentity = localStorage.getItem("serializedIdentity");
+      }
+
+      const identityObj = new Identity(serializedIdentity!);
+      const artifactIdc = identityObj.generateCommitment().toString();
       const artifactPubNullifier = poseidon([
         respData.ext_nullifier,
-        new Identity(artifact.toString()).getNullifier(),
+        identityObj.getNullifier(),
       ]).toString();
 
-      if (!(artifactIdc in respData.leafToPathElements)) {
+      if (!(artifactIdc.toString() in respData.leafToPathElements)) {
         setStage(Stage.INVALIDART);
         return;
       }
+
+      setZKIdentity(identityObj);
+      localStorage.setItem("serializedIdentity", serializedIdentity!);
+      router.push("/taz", undefined, { shallow: true });
 
       setMerkleTree(respData);
       setIdc(artifactIdc);
       setPubNullifier(artifactPubNullifier);
       setStage(Stage.SPELLTYPE);
-
-      let nullifierRep: number = 0;
-      for (const nullifier of respData.nullifiers) {
-        if (nullifier.value === artifactPubNullifier) {
-          nullifierRep = nullifier.reputation!;
-        }
-      }
-      setReputation(nullifierRep);
-      setTweetFooter(`, says ${reputationToRoleText(nullifierRep)}.`);
     }
     getMerkleTree();
-  }, [artifact]);
+  }, []);
+
+  const parseReplyId = (replyTweetLink: string) => {
+    setReplyTweetId(null);
+    const linkRegex = /.*twitter.com\/.*\/(\d*)/g;
+    const matches = linkRegex.exec(replyTweetLink);
+    if (!matches) {
+      return;
+    }
+    setReplyTweetId(matches[1]);
+  };
 
   const castMessage = () => {
     const genProofAsync = async () => {
@@ -107,33 +144,28 @@ const PostMsgPage = () => {
         return;
       }
 
-      const userId = new Identity(artifact!.toString());
-
       const hashedData: HashedData = {
         msg,
-        replyId,
+        replyTweetId,
         pubNullifier,
         msgType,
       };
 
       const input = {
-        identityTrapdoor: userId.getTrapdoor().toString(),
-        identityNullifier: userId.getNullifier().toString(),
+        identityTrapdoor: zkIdentity!.getTrapdoor().toString(),
+        identityNullifier: zkIdentity!.getNullifier().toString(),
         treePathIndices: merkleTree.leafToPathIndices[idc],
         treeSiblings: merkleTree.leafToPathElements[idc],
         externalNullifier: merkleTree.ext_nullifier,
         signalHash: generateSignalHash(JSON.stringify(hashedData)).toString(),
       };
 
-      console.log("Proof inputs:");
-      console.log(input);
-
       setStage(Stage.INPROGRESS);
 
       setLoadingMessage("Gathering equipment");
       await downloadProofFiles(merkleTree.proof);
 
-      setLoadingMessage("Using your artifact");
+      setLoadingMessage("Using your wand");
       const { proof, publicSignals } = await generateProof(
         input,
         merkleTree.proof
@@ -149,30 +181,31 @@ const PostMsgPage = () => {
   };
 
   const submit = async () => {
+    setSubmitPending(true);
     const hashedData = {
       msg,
-      replyId,
+      replyTweetId,
       pubNullifier,
       msgType,
     };
 
-    // const resp = await fetch("/api/magic", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     proof,
-    //     publicSignals,
-    //     hashedData,
-    //   }),
-    // });
+    const resp = await fetch("/api/taz", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        proof,
+        publicSignals,
+        hashedData,
+      }),
+    });
 
-    // const respData = await resp.json();
-    // setProofIpfs(respData["ipfsHash"]);
-    // setTweetLink(respData["tweetURL"]);
-
+    const respData = await resp.json();
+    setProofIpfs(respData["ipfsHash"]);
+    setTweetLink(respData["tweetURL"]);
     setStage(Stage.SUCCESS);
+    setSubmitPending(false);
   };
 
   const openSlideOver = (slideoverContent: any, title: string) => {
@@ -205,7 +238,7 @@ const PostMsgPage = () => {
           )}
         </Slideover>
 
-        <div className="flex h-full items-center justify-center bg-heyanonpurple text-white">
+        <div className="flex h-full items-center justify-center bg-heyanonyellow text-white">
           <div className="prose max-w-prose">
             {stage !== Stage.INPROGRESS ? (
               <div className="flex justify-center pt-10">
@@ -237,7 +270,7 @@ const PostMsgPage = () => {
                   <div className="flex flex-col justify-center text-center">
                     <Button className="mb-5">
                       <a
-                        href={`https://twitter.com/TheZKGuild`}
+                        href={`https://twitter.com/DevconAnon`}
                         target="_blank"
                         rel="noreferrer"
                         style={{
@@ -266,19 +299,18 @@ const PostMsgPage = () => {
                     >
                       Reply
                     </Button>
-                    <Button
-                      className="mb-5"
-                      onClick={() => {
-                        setStage(Stage.UPVOTE);
-                        setMsgType("UPVOTE");
-                        setMsg("This is a good post!");
-                      }}
-                    >
-                      Upvote
-                    </Button>
 
-                    <div>
-                      Casting as <u>{reputationToRoleText(reputation)}</u>
+                    <div className="mt-2">
+                      <a
+                        style={{
+                          color: "red",
+                        }}
+                        href="https://personaelabs.org/posts/sbcheyanon/#:~:text=Highlighting%20the-,magic,-of%20ZK"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Why do we use magical terms?
+                      </a>
                     </div>
                   </div>
                 )}
@@ -300,9 +332,9 @@ const PostMsgPage = () => {
                       rows={1}
                       name="replyId"
                       id="replyId"
-                      className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5 mb-5"
-                      placeholder={"Replied message #.."}
-                      onChange={(e) => setReplyId(e.target.value)}
+                      className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5 mb-5 whitespace-nowrap"
+                      placeholder={"Paste full tweet link..."}
+                      onChange={(e) => parseReplyId(e.target.value)}
                     />
                     <textarea
                       rows={4}
@@ -311,18 +343,6 @@ const PostMsgPage = () => {
                       className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5"
                       placeholder={"Message here..."}
                       onChange={(e) => setMsg(e.target.value)}
-                    />
-                  </div>
-                )}
-                {stage === Stage.UPVOTE && (
-                  <div className="">
-                    <textarea
-                      rows={1}
-                      name="replyId"
-                      id="replyId"
-                      className="block w-full resize-none rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm	p-5 mb-5"
-                      placeholder={"Upvoted message #..."}
-                      onChange={(e) => setReplyId(e.target.value)}
                     />
                   </div>
                 )}
@@ -347,7 +367,14 @@ const PostMsgPage = () => {
                 {stage === Stage.SUCCESS && (
                   <div className="flex flex-col justify-center text-center">
                     <div className="mb-2">
-                      <a href={`${tweetLink}`} target="_blank" rel="noreferrer">
+                      <a
+                        href={`${tweetLink}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          color: "red",
+                        }}
+                      >
                         <u>Link to tweet</u>
                       </a>
                     </div>
@@ -357,12 +384,20 @@ const PostMsgPage = () => {
                         href={"https://discord.gg/kmKAC5T6sV"}
                         target="_blank"
                         rel="noreferrer"
+                        style={{
+                          color: "red",
+                        }}
                       >
                         <u>discord!</u>
                       </a>
                     </div>
                     <div>
-                      <a href={`https://heyanon.xyz/magic/${artifact}`}>
+                      <a
+                        href={`https://heyanon.xyz/taz`}
+                        style={{
+                          color: "red",
+                        }}
+                      >
                         <u>Post again!</u>
                       </a>
                     </div>
@@ -371,25 +406,58 @@ const PostMsgPage = () => {
               </div>
 
               <div className="flex justify-center py-2">
-                {[Stage.MESSAGE, Stage.REPLY, Stage.UPVOTE].indexOf(stage) !==
-                  -1 && (
-                  <Button
-                    disabled={
-                      msg === null ||
-                      msg.length === 0 ||
-                      msg.length > MAX_MESSAGE_LENGTH
-                    }
-                    onClick={castMessage}
-                    className="disabled:opacity-50"
-                  >
-                    {(msg ? msg.length : 0) + tweetFooter.length >
-                    MAX_MESSAGE_LENGTH
-                      ? "Message too long"
-                      : "Cast spell"}
-                  </Button>
+                {stage === Stage.MESSAGE && (
+                  <>
+                    <Button
+                      disabled={
+                        msg === null ||
+                        msg.length === 0 ||
+                        msg.length > MAX_MESSAGE_LENGTH
+                      }
+                      onClick={castMessage}
+                      className="disabled:opacity-50 mr-5"
+                    >
+                      {(msg ? msg.length : 0) > MAX_MESSAGE_LENGTH
+                        ? "Message too long"
+                        : "Cast spell"}
+                    </Button>
+                    <Button
+                      onClick={() => setStage(Stage.SPELLTYPE)}
+                      className="disabled:opacity-50"
+                    >
+                      Back
+                    </Button>
+                  </>
+                )}
+
+                {stage === Stage.REPLY && (
+                  <>
+                    <Button
+                      disabled={
+                        msg === null ||
+                        msg.length === 0 ||
+                        msg.length > MAX_MESSAGE_LENGTH ||
+                        replyTweetId === null
+                      }
+                      onClick={castMessage}
+                      className="disabled:opacity-50 mr-5"
+                    >
+                      {(msg ? msg.length : 0) > MAX_MESSAGE_LENGTH
+                        ? "Message too long"
+                        : "Cast spell"}
+                    </Button>
+                    <Button
+                      onClick={() => setStage(Stage.SPELLTYPE)}
+                      className="disabled:opacity-50"
+                    >
+                      Back
+                    </Button>
+                  </>
                 )}
                 {stage === Stage.SUBMIT && (
-                  <Button disabled={true}>Submit</Button>
+                  <Button disabled={submitPending} onClick={submit}>
+                    Submit
+                  </Button>
                 )}
               </div>
             </div>

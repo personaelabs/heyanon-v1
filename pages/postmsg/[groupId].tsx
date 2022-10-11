@@ -447,7 +447,6 @@ const PostMsgPage = () => {
                 {stage === Stage.MSGTYPE &&
                   msgType !== null &&
                   (msgType === "post" || replyId !== null) && (
-                    // TODO: disable when replyId is empty
                     <div>
                       <Button onClick={() => setStage(Stage.TWEET)}>
                         Next
