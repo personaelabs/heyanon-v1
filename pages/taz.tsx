@@ -17,7 +17,7 @@ import { Identity } from "@semaphore-protocol/identity";
 import { Subgraph } from "@semaphore-protocol/subgraph";
 import { Group } from "@semaphore-protocol/group";
 
-import { HashedData } from "../lib/tazUtils";
+import { HashedData, getGroupIdentities } from "../lib/tazUtils";
 
 // tweet size minus verify message '\n\nheyanon.xyz/verify/IPFSHASH'
 // chose 250 to be sure of no message overflows
@@ -68,14 +68,10 @@ const PostMsgPage = () => {
       const respData: MerkleTree = await resp.json();
 
       // get subgraph group
-      const subgraph = new Subgraph("goerli");
-      const subgraphGroup = await subgraph.getGroup("10807", {
-        members: true,
-      });
-      let groupObj = new Group(parseInt(subgraphGroup.merkleTree.depth));
-      groupObj.addMembers(subgraphGroup.members);
-
-      for (const member of subgraphGroup.members) {
+      let members = await getGroupIdentities();
+      let groupObj = new Group(16);
+      groupObj.addMembers(members);
+      for (const member of members) {
         const merkleProof = groupObj.generateProofOfMembership(
           groupObj.indexOf(BigInt(member))
         );
@@ -86,6 +82,7 @@ const PostMsgPage = () => {
           el.toString()
         );
       }
+      console.log(members.length);
 
       // get identity
       let serializedIdentity;
