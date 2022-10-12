@@ -82,7 +82,6 @@ const PostMsgPage = () => {
           el.toString()
         );
       }
-      console.log(members.length);
 
       // get identity
       let serializedIdentity;
