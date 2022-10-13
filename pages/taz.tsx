@@ -14,7 +14,6 @@ import { generateProof, downloadProofFiles } from "../lib/zkp";
 import { MerkleTree } from "../lib/merkleTree";
 import { poseidon } from "circomlibjs";
 import { Identity } from "@semaphore-protocol/identity";
-import { Subgraph } from "@semaphore-protocol/subgraph";
 import { Group } from "@semaphore-protocol/group";
 
 import { HashedData, getGroupIdentities } from "../lib/tazUtils";
@@ -30,11 +29,10 @@ enum Stage {
   SPELLTYPE = "Cast a spell",
   MESSAGE = "Post a tweet",
   REPLY = "Reply to any tweet",
-  HP = "Harry Potter sign up",
+  HP = "Harry Potter game",
   INPROGRESS = "Magic is happening",
   SUBMIT = "Spell complete!",
   SUCCESS = "Success!",
-  HPSUCCESS = "You're set!",
 }
 
 const PostMsgPage = () => {
@@ -176,21 +174,6 @@ const PostMsgPage = () => {
     };
 
     genProofAsync();
-  };
-
-  const hpSubmit = async () => {
-    setSubmitPending(true);
-    const resp = await fetch("/api/hp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        pubNullifier,
-      }),
-    });
-    setStage(Stage.HPSUCCESS);
-    setSubmitPending(false);
   };
 
   const submit = async () => {
@@ -370,26 +353,11 @@ const PostMsgPage = () => {
                 {stage === Stage.HP && (
                   <div className="flex flex-col justify-center text-center">
                     <div className="mb-4">
-                      1. You must check at the start of each game if you are
-                      Harry, Hermoine, or Ron
+                      Due to other Personae commitments, we have decided to
+                      cancel this game.
                     </div>
                     <div className="mb-4">
-                      2. You must use the Twitter feed to coordinate your defeat
-                      of Voldemort
-                    </div>
-                    <div>
-                      3. Join the Personae{" "}
-                      <a
-                        href={"https://discord.gg/H2wrU2hA"}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          color: "red",
-                        }}
-                      >
-                        <u>discord</u>
-                      </a>{" "}
-                      and watch the harry-potter channel for updates!
+                      It will return at another conference!
                     </div>
                   </div>
                 )}
@@ -450,24 +418,6 @@ const PostMsgPage = () => {
                     </div>
                   </div>
                 )}
-                {stage === Stage.HPSUCCESS && (
-                  <div className="flex flex-col justify-center text-center">
-                    <div className="mb-2">Game 1: Thursday 10am - 2pm</div>
-                    <div className="mb-2">Game 2: Thursday 2pm - 6pm</div>
-                    <div className="mb-2">Game 3: Friday 10am - 2pm</div>
-                    <div className="mb-5">Game 4: Friday 2pm - 6pm</div>
-                    <div>
-                      <a
-                        href={`https://heyanon.xyz/taz`}
-                        style={{
-                          color: "red",
-                        }}
-                      >
-                        <u>Post a message!</u>
-                      </a>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="flex justify-center py-2">
@@ -521,8 +471,8 @@ const PostMsgPage = () => {
                 )}
 
                 {stage === Stage.HP && (
-                  <Button disabled={submitPending} onClick={hpSubmit}>
-                    Submit
+                  <Button onClick={() => setStage(Stage.SPELLTYPE)}>
+                    Back
                   </Button>
                 )}
 
