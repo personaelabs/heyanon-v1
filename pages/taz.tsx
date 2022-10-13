@@ -29,7 +29,6 @@ enum Stage {
   SPELLTYPE = "Cast a spell",
   MESSAGE = "Post a tweet",
   REPLY = "Reply to any tweet",
-  HP = "Harry Potter game",
   INPROGRESS = "Magic is happening",
   SUBMIT = "Spell complete!",
   SUCCESS = "Success!",
@@ -295,14 +294,6 @@ const PostMsgPage = () => {
                     >
                       Reply
                     </Button>
-                    <Button
-                      className="mb-5"
-                      onClick={() => {
-                        setStage(Stage.HP);
-                      }}
-                    >
-                      Harry Potter sign-up
-                    </Button>
 
                     <div className="mt-2">
                       <a
@@ -468,12 +459,6 @@ const PostMsgPage = () => {
                       Back
                     </Button>
                   </>
-                )}
-
-                {stage === Stage.HP && (
-                  <Button onClick={() => setStage(Stage.SPELLTYPE)}>
-                    Back
-                  </Button>
                 )}
 
                 {stage === Stage.SUBMIT && (
