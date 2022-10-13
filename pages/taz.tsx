@@ -341,17 +341,6 @@ const PostMsgPage = () => {
                     />
                   </div>
                 )}
-                {stage === Stage.HP && (
-                  <div className="flex flex-col justify-center text-center">
-                    <div className="mb-4">
-                      Due to other Personae commitments, we have decided to
-                      cancel this game.
-                    </div>
-                    <div className="mb-4">
-                      It will return at another conference!
-                    </div>
-                  </div>
-                )}
                 {stage === Stage.INPROGRESS && (
                   <div className="flex justify-center text-center">
                     <span> {`${loadingMessage}`} </span>
