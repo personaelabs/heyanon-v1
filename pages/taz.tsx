@@ -23,7 +23,7 @@ import { HashedData, getGroupIdentities } from "../lib/tazUtils";
 const MAX_MESSAGE_LENGTH = 250 - 75;
 
 enum Stage {
-  CONNECTING = "Retreiving group",
+  CONNECTING = "Retrieving group",
   INVALIDART = "Invalid ID, reload in 2 min",
   GOTOTAZ = "Invalid URL, return to TAZ",
   SPELLTYPE = "Cast a spell",
