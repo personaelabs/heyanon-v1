@@ -25,6 +25,7 @@
     "autoprefixer": "^10.4.7",
     "axios": "^1.1.2",
     "circomlibjs": "0.0.8",
+    "circomlibjs017": "npm:circomlibjs@0.1.7",
     "dotenv": "^16.0.1",
     "ethers": "5.6.8",
     "got": "12.1.0",
