@@ -1,4 +1,4 @@
-import { buildTreePoseidon } from "../../data/src/merklePoseidon"; // on pierre/data-merge
+import { buildTreePoseidon } from "./merklePoseidon"; // on pierre/data-merge
 
 export const checkGroupExists = async (dbEntry: any, route: string) => {
   const responseExists = await fetch(route, {

@@ -4,8 +4,11 @@ import Image from "next/image";
 import { Dispatch, FunctionComponent, SetStateAction, useRef, useState } from "react";
 import { Title } from "../components/Base";
 import Papa from "papaparse";
-import ethers from "ethers";
+import { ethers } from "ethers";
 import { checkGroupExists, createGroupEntry, formatCreateTreeJSONBody, uploadTree } from "../lib/submitgroup";
+import { buildTreePoseidon } from "../lib/merklePoseidon";
+
+export const textOnUpload = "Submit";
 
 export const PageDescription: FunctionComponent = () => {
     return (
@@ -113,10 +116,10 @@ interface TreeDetails {
     whyUseful: string;
     howGenerated: string;
     secretIndex: number;
-  }
+}
 
-  
-export const TreeInfo: FunctionComponent<{treeDetails: TreeDetails}> = ({ treeDetails }) => {
+
+export const TreeInfo: FunctionComponent<{ treeDetails: TreeDetails; }> = ({ treeDetails }) => {
     return (
         <>
             <div className='flex justify-center my-10'>
@@ -125,6 +128,27 @@ export const TreeInfo: FunctionComponent<{treeDetails: TreeDetails}> = ({ treeDe
         </>
     );
 };
+
+export const generateTree = async (
+    treeInfo: TreeDetails,
+    addresses: string[]
+) => {
+    // @dev: for now: static, proof, credential id are static
+    const tree: any = await buildTreePoseidon(addresses, 13, 30, 0n);
+    tree[ "groupId" ] = treeInfo.groupId;
+    tree[ "groupName" ] = treeInfo.groupName;
+    tree[ "twitterAccount" ] = treeInfo.twitterAccount;
+    tree[ "description" ] = treeInfo.description;
+    tree[ "whyUseful" ] = treeInfo.whyUseful;
+    tree[ "howGenerated" ] = treeInfo.howGenerated;
+    tree[ "secretIndex" ] = treeInfo.secretIndex;
+    tree[ "approved" ] = true;
+    tree[ "moderationStatus" ] = "NONE";
+    tree[ "static" ] = true;
+    tree[ "proofId" ] = 1;
+    return tree;
+};
+
 
 const SubmitGroup: NextPage = () => {
     const [ groupId, setgroupId ] = useState<null | string>(null);
@@ -172,46 +196,44 @@ const SubmitGroup: NextPage = () => {
     const onClickSubmit = async (e: Event) => {
         e.preventDefault();
         if (groupId && groupName && groupTwitterAcc && groupDescription && groupUsefulness && generationMethod && addresses) {
-          setdisableSubmit(true);
-          const entry = {
-            groupId,
-            groupName,
-            twitterAccount: groupTwitterAcc,
-            description: groupDescription,
-            whyUseful: groupUsefulness,
-            howGenerated: generationMethod,
-            secretIndex: 42
-          };
-          settreeState(TreeState.TREE_PRECHECKS);
-          const groupExists = await (await checkGroupExists(entry, "/api/group/exists")).json();
-          if (groupExists.error) {
-            settreeState(TreeError.SERVER_ERROR);
-          }
-          else if (groupExists.groupExists) {
-            settreeState(TreeError.GROUP_EXISTS);
-          }
-          else if (groupExists.twitterExists) {
-            settreeState(TreeError.TWITTER_EXISTS);
-          }
-          else {
-            settreeState(TreeState.TREE_BUILDING);
-            const tree = await generateTree(entry, addresses);
-            settreeState(TreeState.TREE_CREATING_ENTRY);
-            if (developmentPostToDb) {
-              const groupEntry = await (await createGroupEntry(tree, "/api/group/create")).json();
-              const formattedTree = formatCreateTreeJSONBody(tree);
-              // @dev api route name is imprecise since we create multiple leaves
-              settreeState(TreeState.TREE_UPLOADING_USERS);
-              const uploadedTree = await uploadTree(formattedTree.leafToPathElements, formattedTree.leafToPathIndices, groupEntry.groupId, "/api/tree/create");
+            setdisableSubmit(true);
+            const entry = {
+                groupId,
+                groupName,
+                twitterAccount: groupTwitterAcc,
+                description: groupDescription,
+                whyUseful: groupUsefulness,
+                howGenerated: generationMethod,
+                secretIndex: 42
+            };
+            settreeState(TreeState.TREE_PRECHECKS);
+            const groupExists = await (await checkGroupExists(entry, "/api/group/exists")).json();
+            if (groupExists.error) {
+                settreeState(TreeError.SERVER_ERROR);
             }
-            settreeState(TreeState.TREE_UPLOADED);
-            settree(tree);
-            setbuttonText(textOnUpload);
-          }
-          setdisableSubmit(false);
+            else if (groupExists.groupExists) {
+                settreeState(TreeError.GROUP_EXISTS);
+            }
+            else if (groupExists.twitterExists) {
+                settreeState(TreeError.TWITTER_EXISTS);
+            }
+            else {
+                settreeState(TreeState.TREE_BUILDING);
+                const tree = await generateTree(entry, addresses);
+                settreeState(TreeState.TREE_CREATING_ENTRY);
+                const groupEntry = await (await createGroupEntry(tree, "/api/group/create")).json();
+                const formattedTree = formatCreateTreeJSONBody(tree);
+                // @dev api route name is imprecise since we create multiple leaves
+                settreeState(TreeState.TREE_UPLOADING_USERS);
+                const uploadedTree = await uploadTree(formattedTree.leafToPathElements, formattedTree.leafToPathIndices, groupEntry.groupId, "/api/tree/create");
+                settreeState(TreeState.TREE_UPLOADED);
+                settree(tree);
+                setbuttonText(textOnUpload);
+            }
+            setdisableSubmit(false);
         }
-      };
-    
+    };
+
     return (
         <div className="scroll-smooth">
             <Header></Header>
@@ -228,7 +250,9 @@ const SubmitGroup: NextPage = () => {
                     <input onChange={loadCsv} ref={refInputCsv} type="file" id="ecdsaAddresses" accept='.csv' />
                     {/** preventing default submit behaviour on button for now */}
                 </form>
-                <SubmitButton text={buttonText} disabled={disableSubmit} onClick={async (e) => await onClickSubmit(e)}></SubmitButton>
+            </div>
+            <SubmitButton text={buttonText} disabled={disableSubmit} onClick={async (e) => await onClickSubmit(e)}></SubmitButton>
+            <div className="flex justify-end">
                 <TreeStateLog treeState={treeState}></TreeStateLog>
                 {tree && <TreeInfo treeDetails={tree}></TreeInfo>}
             </div>
