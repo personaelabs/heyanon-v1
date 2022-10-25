@@ -42,11 +42,36 @@ export const Header: FunctionComponent = () => {
     );
 };
 
+export const TreeStateLog: FunctionComponent<{ treeState: string; }> = ({ treeState }) => {
+    return (
+        <div className='mt-5 justify-end'>{treeState}</div>
+    );
+};
+
+
+interface SubmitButtonInterface {
+    text: string;
+    disabled: boolean;
+    onClick: (e: any) => Promise<void>;
+}
+
+
 interface TextInputInterface {
     descriptionTextInput: string;
     stateSetter: Dispatch<SetStateAction<null | string>>;
     initialState: null | string;
 }
+
+
+
+export const SubmitButton: FunctionComponent<SubmitButtonInterface> = ({ text, disabled, onClick }) => {
+    const buttonStyle = disabled ? "opacity-50" : "hover:opacity-50";
+    return (
+        <div className={`flex w-8/12 justify-end`}>
+            <button disabled={false} onClick={onClick} className={`p-3 rounded-lg ${buttonStyle} border-black border-2`}>{text}</button>
+        </div>
+    );
+};
 
 
 export const TextInput: FunctionComponent<TextInputInterface> = ({ descriptionTextInput, stateSetter, initialState }) => {
@@ -78,6 +103,27 @@ enum TreeError {
     SERVER_ERROR = "Server error: contact @personaelabs"
 }
 
+interface TreeDetails {
+    groupId: string;
+    groupName: string;
+    twitterAccount: string;
+    description: string;
+    whyUseful: string;
+    howGenerated: string;
+    secretIndex: number;
+  }
+
+  
+export const TreeInfo: FunctionComponent<{treeDetails: TreeDetails}> = ({ treeDetails }) => {
+    return (
+        <>
+            <div className='flex justify-center my-10'>
+                Generated tree for groupId: {treeDetails.groupId}
+            </div>
+        </>
+    );
+};
+
 const SubmitGroup: NextPage = () => {
     const [ groupId, setgroupId ] = useState<null | string>(null);
     const [ groupName, setgroupName ] = useState<null | string>(null);
@@ -90,6 +136,9 @@ const SubmitGroup: NextPage = () => {
     const [ buttonText, setbuttonText ] = useState("Submit");
     const [ addresses, setaddresses ] = useState<string[] | null>(null);
     const refInputCsv = useRef<null | HTMLInputElement>(null);
+
+    // @dev: any should not be provided as type for tree here
+    const [ tree, settree ] = useState<any | null>(null);
 
     const loadCsv = () => {
         const inputCsv = refInputCsv.current ? refInputCsv.current.files![ 0 ] : null;
@@ -118,7 +167,49 @@ const SubmitGroup: NextPage = () => {
         }
     };
 
-
+    const onClickSubmit = async (e: Event) => {
+        e.preventDefault();
+        if (groupId && groupName && groupTwitterAcc && groupDescription && groupUsefulness && generationMethod && addresses) {
+          setdisableSubmit(true);
+          const entry = {
+            groupId,
+            groupName,
+            twitterAccount: groupTwitterAcc,
+            description: groupDescription,
+            whyUseful: groupUsefulness,
+            howGenerated: generationMethod,
+            secretIndex: 42
+          };
+          settreeState(TreeState.TREE_PRECHECKS);
+          const groupExists = await (await checkGroupExists(entry, "/api/group/exists")).json();
+          if (groupExists.error) {
+            settreeState(TreeError.SERVER_ERROR);
+          }
+          else if (groupExists.groupExists) {
+            settreeState(TreeError.GROUP_EXISTS);
+          }
+          else if (groupExists.twitterExists) {
+            settreeState(TreeError.TWITTER_EXISTS);
+          }
+          else {
+            settreeState(TreeState.TREE_BUILDING);
+            const tree = await generateTree(entry, addresses);
+            settreeState(TreeState.TREE_CREATING_ENTRY);
+            if (developmentPostToDb) {
+              const groupEntry = await (await createGroupEntry(tree, "/api/group/create")).json();
+              const formattedTree = formatCreateTreeJSONBody(tree);
+              // @dev api route name is imprecise since we create multiple leaves
+              settreeState(TreeState.TREE_UPLOADING_USERS);
+              const uploadedTree = await uploadTree(formattedTree.leafToPathElements, formattedTree.leafToPathIndices, groupEntry.groupId, "/api/tree/create");
+            }
+            settreeState(TreeState.TREE_UPLOADED);
+            settree(tree);
+            setbuttonText(textOnUpload);
+          }
+          setdisableSubmit(false);
+        }
+      };
+    
     return (
         <div className="scroll-smooth">
             <Header></Header>
@@ -135,6 +226,9 @@ const SubmitGroup: NextPage = () => {
                     <input onChange={loadCsv} ref={refInputCsv} type="file" id="ecdsaAddresses" accept='.csv' />
                     {/** preventing default submit behaviour on button for now */}
                 </form>
+                <SubmitButton text={buttonText} disabled={disableSubmit} onClick={async (e) => await onClickSubmit(e)}></SubmitButton>
+                <TreeStateLog treeState={treeState}></TreeStateLog>
+                {tree && <TreeInfo treeDetails={tree}></TreeInfo>}
             </div>
         </div>
     );
