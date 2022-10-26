@@ -1,22 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-export const formatTestTreeEntry = (
-  groupTemplateJSON: groupTemplateJSON,
-  prefix: string
-): TreeDetails => {
-  /**
-   * small utils for formatting a template json for denoting test data
-   * hopefully until a test env exists on HeyAnon
-   */
-  const randint = Math.floor(Math.random() * 10000);
-  const testPrefix = `${prefix}_${randint}`;
-  const dbEntry = Object.entries(groupTemplateJSON).map((o) => [
-    o[0],
-    `${testPrefix}_${o[1]}`,
-  ]);
-  return Object.fromEntries(dbEntry);
-};
-
 export const getUserId = async (address: string, prisma: PrismaClient) => {
   const user = prisma.user.findUnique({
     where: {

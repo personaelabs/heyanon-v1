@@ -49,7 +49,7 @@ export const Header: FunctionComponent = () => {
 
 export const TreeStateLog: FunctionComponent<{ treeState: string; }> = ({ treeState }) => {
     return (
-        <div className='mt-5 justify-end'>{treeState}</div>
+        <div className='flex justify-center my-10'>{treeState}</div>
     );
 };
 
@@ -252,10 +252,8 @@ const SubmitGroup: NextPage = () => {
                 </form>
             </div>
             <SubmitButton text={buttonText} disabled={disableSubmit} onClick={async (e) => await onClickSubmit(e)}></SubmitButton>
-            <div className="flex justify-end">
-                <TreeStateLog treeState={treeState}></TreeStateLog>
-                {tree && <TreeInfo treeDetails={tree}></TreeInfo>}
-            </div>
+            <TreeStateLog treeState={treeState}></TreeStateLog>
+            {tree && <TreeInfo treeDetails={tree}></TreeInfo>}
         </div>
     );
 };
