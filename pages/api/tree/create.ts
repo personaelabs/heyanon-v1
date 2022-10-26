@@ -4,7 +4,7 @@ import {
   createLeaf,
   createUser,
   getUserId,
-} from "../../../common/utils/heyanondb";
+} from "../../../lib/common/utils/heyanondb";
 
 type LeavesEntries = {
   leaves: any;

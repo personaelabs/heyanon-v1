@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import {
   groupNameExists,
   twitterAccountExists,
-} from "../../../common/utils/heyanondb";
+} from "../../../lib/common/utils/heyanondb";
 
 type ExistsData = {
   twitterExists: boolean;

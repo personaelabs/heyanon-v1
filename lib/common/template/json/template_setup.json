@@ -1,0 +1,9 @@
+{
+    "groupId": "foo",
+    "groupName": "bar",
+    "twitterAccount": "@baz",
+    "description": "foobarbaz",
+    "whyUseful": "bazbarfoo",
+    "howGenerated": "barfoobaz",
+    "secretIndex": 42
+  }
