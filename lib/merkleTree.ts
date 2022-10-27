@@ -1,5 +1,8 @@
 import { Prisma, PrismaClient, Proof } from "@prisma/client";
 
+//@ts-ignore
+import { buildTreePoseidon } from "merkle-poseidon/lib";
+
 const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
 
 export type MerkleTree = Prisma.GroupGetPayload<{
@@ -36,3 +39,23 @@ export async function treeFromCloudfront(filename: string) {
   });
   return treeResp.json();
 }
+
+export const generateTree = async (
+  treeInfo: TreeDetails,
+  addresses: string[]
+) => {
+  // @dev: for now: static, proof, credential id are static
+  const tree: any = await buildTreePoseidon(addresses, 13, 30, 0n);
+  tree["groupId"] = treeInfo.groupId;
+  tree["groupName"] = treeInfo.groupName;
+  tree["twitterAccount"] = treeInfo.twitterAccount;
+  tree["description"] = treeInfo.description;
+  tree["whyUseful"] = treeInfo.whyUseful;
+  tree["howGenerated"] = treeInfo.howGenerated;
+  tree["secretIndex"] = treeInfo.secretIndex;
+  tree["approved"] = true;
+  tree["moderationStatus"] = "NONE";
+  tree["static"] = true;
+  tree["proofId"] = 1;
+  return tree;
+};

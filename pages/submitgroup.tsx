@@ -1,156 +1,17 @@
 import { NextPage } from "next";
-import Head from "next/head";
-import Image from "next/image";
-import { Dispatch, FunctionComponent, SetStateAction, useRef, useState } from "react";
-import { Title } from "../components/Base";
+import { useRef, useState } from "react";
 import Papa from "papaparse";
 import { ethers } from "ethers";
 import { checkGroupExists, createGroupEntry, formatCreateTreeJSONBody, uploadTree } from "../lib/submitgroup";
-// import { buildTreePoseidon } from "../lib/merklePoseidon";
-//@ts-ignore
-import { buildTreePoseidon } from "merkle-poseidon/lib";
+import { GroupSubmissionDescription } from "../components/submitgroup/GroupSubmissionDescription";
+import { TreeError, TreeState, TreeStateLog } from "../components/submitgroup/TreeStateLog";
+import { SubmitButton } from "../components/submitgroup/SubmitButton";
+import { TextInput } from "../components/submitgroup/TextInput";
+import { TreeInfo } from "../components/submitgroup/TreeInfo";
+import { generateTree } from "../lib/merkleTree";
+import Head from "next/head";
 
 export const textOnUpload = "Submit";
-
-export const PageDescription: FunctionComponent = () => {
-    return (
-        <div className="flex h-full justify-center bg-heyanonred text-white">
-            <div className="items-center justify-center self-center prose max-w-prose">
-                <div className="flex justify-center pt-10">
-                    <Image src="/logo.svg" alt="heyanon!" width="174" height="120" />
-                </div>
-
-                <div className="px-8">
-                    <div className="flex text-center justify-center pb-5">
-                        <Title>
-                            Create a group with{" "}
-                            <a
-                                href="https://twitter.com/heyanonxyz"
-                                target="_blank"
-                                rel="noreferrer noopener"
-                            >
-                                @heyanonxyz
-                            </a>
-                            !
-                        </Title>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-export const Header: FunctionComponent = () => {
-    return (
-        <Head>
-            <title>heyanon!</title>
-            <link rel="icon" href="/heyanon.ico" />
-        </Head>
-
-    );
-};
-
-export const TreeStateLog: FunctionComponent<{ treeState: string; }> = ({ treeState }) => {
-    return (
-        <div className='flex justify-center my-10'>{treeState}</div>
-    );
-};
-
-
-interface SubmitButtonInterface {
-    text: string;
-    disabled: boolean;
-    onClick: (e: any) => Promise<void>;
-}
-
-
-interface TextInputInterface {
-    descriptionTextInput: string;
-    stateSetter: Dispatch<SetStateAction<null | string>>;
-    initialState: null | string;
-}
-
-
-
-export const SubmitButton: FunctionComponent<SubmitButtonInterface> = ({ text, disabled, onClick }) => {
-    const buttonStyle = disabled ? "opacity-50" : "hover:opacity-50";
-    return (
-        <div className={`flex w-8/12 justify-end`}>
-            <button disabled={false} onClick={onClick} className={`p-3 rounded-lg ${buttonStyle} border-black border-2`}>{text}</button>
-        </div>
-    );
-};
-
-
-export const TextInput: FunctionComponent<TextInputInterface> = ({ descriptionTextInput, stateSetter, initialState }) => {
-    return (
-        <div className="mb-10">
-            <div className="mb-2">
-                {descriptionTextInput}
-            </div>
-            <div>
-                <input className='border-b-2 bg-heyanonred w-10/12 outline-none border-black' onChange={(e) => stateSetter(e.target.value)} type="text" />
-            </div>
-        </div>
-    );
-};
-
-enum TreeState {
-    TREE_NOT_SUBMITTED = "",
-    TREE_PRECHECKS = "20% - Checking that tree does not already exists...",
-    TREE_BUILDING = "40% - Tree is being built...",
-    TREE_CREATING_ENTRY = "60% - A new group entry is being created...",
-    TREE_UPLOADING_USERS = "80% - Uploading tree users and leaves...",
-    TREE_UPLOADED = "100% - Tree uploaded!"
-}
-
-enum TreeError {
-    GROUP_EXISTS = "Error: group already exists",
-    TWITTER_EXISTS = "Error: twitter already exists",
-    INVALID_ADDRESS = "Error: invalid keccak address found in csv",
-    SERVER_ERROR = "Server error: contact @personaelabs"
-}
-
-interface TreeDetails {
-    groupId: string;
-    groupName: string;
-    twitterAccount: string;
-    description: string;
-    whyUseful: string;
-    howGenerated: string;
-    secretIndex: number;
-}
-
-
-export const TreeInfo: FunctionComponent<{ treeDetails: TreeDetails; }> = ({ treeDetails }) => {
-    return (
-        <>
-            <div className='flex justify-center my-10'>
-                Generated tree for groupId: {treeDetails.groupId}
-            </div>
-        </>
-    );
-};
-
-export const generateTree = async (
-    treeInfo: TreeDetails,
-    addresses: string[]
-) => {
-    // @dev: for now: static, proof, credential id are static
-    const tree: any = await buildTreePoseidon(addresses, 13, 30, 0n);
-    tree[ "groupId" ] = treeInfo.groupId;
-    tree[ "groupName" ] = treeInfo.groupName;
-    tree[ "twitterAccount" ] = treeInfo.twitterAccount;
-    tree[ "description" ] = treeInfo.description;
-    tree[ "whyUseful" ] = treeInfo.whyUseful;
-    tree[ "howGenerated" ] = treeInfo.howGenerated;
-    tree[ "secretIndex" ] = treeInfo.secretIndex;
-    tree[ "approved" ] = true;
-    tree[ "moderationStatus" ] = "NONE";
-    tree[ "static" ] = true;
-    tree[ "proofId" ] = 1;
-    return tree;
-};
-
 
 const SubmitGroup: NextPage = () => {
     const [ groupId, setgroupId ] = useState<null | string>(null);
@@ -238,8 +99,11 @@ const SubmitGroup: NextPage = () => {
 
     return (
         <div className="scroll-smooth">
-            <Header></Header>
-            <PageDescription></PageDescription>
+            <Head>
+                <title>heyanon!</title>
+                <link rel="icon" href="/heyanon.ico" />
+            </Head>
+            <GroupSubmissionDescription></GroupSubmissionDescription>
             <div className="flex text-center justify-center mb-10">
                 <form action="">
                     <TextInput initialState={groupId} stateSetter={setgroupId} descriptionTextInput='Enter a group id: '></TextInput>

@@ -1,4 +1,5 @@
-import { buildTreePoseidon } from "./merklePoseidon"; // on pierre/data-merge
+//@ts-ignore
+import { buildTreePoseidon } from "merkle-poseidon/lib";
 
 export const checkGroupExists = async (dbEntry: any, route: string) => {
   const responseExists = await fetch(route, {
@@ -73,16 +74,6 @@ export const formatCreateTreeJSONBody = (body: any) => {
   return body;
 };
 
-interface TreeDetails {
-    groupId: string;
-    groupName: string;
-    twitterAccount: string;
-    description: string;
-    whyUseful: string;
-    howGenerated: string;
-    secretIndex: number;
-  }
-  
 export const generateTree = async (
   treeInfo: TreeDetails,
   addresses: string[]
