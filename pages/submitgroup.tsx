@@ -6,7 +6,9 @@ import { Title } from "../components/Base";
 import Papa from "papaparse";
 import { ethers } from "ethers";
 import { checkGroupExists, createGroupEntry, formatCreateTreeJSONBody, uploadTree } from "../lib/submitgroup";
-import { buildTreePoseidon } from "../lib/merklePoseidon";
+// import { buildTreePoseidon } from "../lib/merklePoseidon";
+//@ts-ignore
+import { buildTreePoseidon } from "merkle-poseidon/lib";
 
 export const textOnUpload = "Submit";
 
