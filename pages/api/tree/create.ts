@@ -6,29 +6,29 @@ import {
 } from "../../../lib/common/utils/heyanondb";
 import prisma from "../../../lib/prisma";
 
-type LeavesEntries = {
-  leaves: any;
-};
-
-
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<LeavesEntries>
+  res: NextApiResponse<LeavesEntriesResponse | ServerErrorResponse>
 ) {
   const body = req.body;
-  for (const address of Object.keys(body.leafToPathElements)) {
-    let userId = await getUserId(address, prisma);
-    if (!userId) {
-      userId = await createUser(address, prisma);
+  try {
+    for (const address of Object.keys(body.leafToPathElements)) {
+      let userId = await getUserId(address, prisma);
+      if (!userId) {
+        userId = await createUser(address, prisma);
+      }
+      const leaf = await createLeaf(
+        body.leafToPathElements[address],
+        body.leafToPathIndices[address],
+        userId.id,
+        body.groupId,
+        prisma
+      );
     }
-    const leaf = await createLeaf(
-      body.leafToPathElements[address],
-      body.leafToPathIndices[address],
-      userId.id,
-      body.groupId,
-      prisma
-    );
+    res.status(200).json({ leaves: [] });
+  } catch (error) {
+    res.status(500).json({
+      error: "Error",
+    });
   }
-
-  res.status(200).json({ leaves: [] });
 }

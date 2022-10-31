@@ -6,18 +6,10 @@ import {
 } from "../../../lib/common/utils/heyanondb";
 import prisma from "../../../lib/prisma";
 
-type ExistsData = {
-  twitterExists: boolean;
-  groupExists: boolean;
-};
-
-type ErrorData = {
-  error: string;
-};
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExistsData | ErrorData>
+  res: NextApiResponse<ExistsResponse | ServerErrorResponse>
 ) {
   const body = req.body;
   try {

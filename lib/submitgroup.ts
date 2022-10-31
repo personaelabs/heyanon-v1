@@ -25,7 +25,7 @@ export const uploadTree = async (
   groupId: number,
   route: string
 ) => {
-  await fetch(route, {
+  const responseTree = await fetch(route, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,6 +36,7 @@ export const uploadTree = async (
       groupId,
     }),
   });
+  return responseTree;
 };
 
 export const createGroupEntry = async (tree: any, route: string) => {
@@ -174,18 +175,28 @@ export const onClickUpload = async (
       const groupEntry = await (
         await createGroupEntry(tree, "/api/group/create")
       ).json();
-      const formattedTree = formatCreateTreeJSONBody(tree);
-      // @dev api route name is imprecise since we create multiple leaves
-      settreeState(TreeState.TREE_UPLOADING_USERS);
-      const uploadedTree = await uploadTree(
-        formattedTree.leafToPathElements,
-        formattedTree.leafToPathIndices,
-        groupEntry.groupId,
-        "/api/tree/create"
-      );
-      settreeState(TreeState.TREE_UPLOADED);
-      settree(tree);
-      setbuttonText(textOnUpload);
+      if (groupEntry.error) {
+        settreeState(TreeError.SERVER_ERROR);
+      } else {
+        const formattedTree = formatCreateTreeJSONBody(tree);
+        // @dev api route name is imprecise since we create multiple leaves
+        settreeState(TreeState.TREE_UPLOADING_USERS);
+        const uploadedTree = await (
+          await uploadTree(
+            formattedTree.leafToPathElements,
+            formattedTree.leafToPathIndices,
+            groupEntry.groupId,
+            "/api/tree/create"
+          )
+        ).json();
+        if (uploadedTree.error) {
+          settreeState(TreeError.SERVER_ERROR);
+        } else {
+          settreeState(TreeState.TREE_UPLOADED);
+          settree(tree);
+          setbuttonText(textOnUpload);
+        }
+      }
     }
     setdisableSubmit(false);
   }
