@@ -22,7 +22,6 @@ export default async function handler(
   body["credential_id"] = createdCredential.id;
   // @dev field not in group creation model
   delete body["twitter_account"];
-  console.log(body);
   const createdGroup = await prisma.group.create({
     data: body,
   });

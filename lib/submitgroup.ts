@@ -1,5 +1,9 @@
 //@ts-ignore
 import { buildTreePoseidon } from "merkle-poseidon/lib";
+import { ethers } from "ethers";
+import Papa from "papaparse";
+import { MutableRefObject, Dispatch, SetStateAction } from "react";
+import { TreeState, TreeError } from "../components/submitgroup/TreeStateLog";
 
 export const checkGroupExists = async (dbEntry: any, route: string) => {
   const responseExists = await fetch(route, {
@@ -92,4 +96,97 @@ export const generateTree = async (
   tree["static"] = true;
   tree["proofId"] = 1;
   return tree;
+};
+
+export const loadAddressCsv = (
+  csvUploadElement: MutableRefObject<HTMLInputElement | null>,
+  settreeState: Dispatch<SetStateAction<TreeState | TreeError>>,
+  setaddresses: Dispatch<SetStateAction<string[] | null>>
+) => {
+  const inputCsv = csvUploadElement.current
+    ? csvUploadElement.current.files![0]
+    : null;
+  if (inputCsv) {
+    Papa.parse(inputCsv, {
+      header: false,
+      complete(results: any, file: any) {
+        let parsedAddresses: string[] | null = [];
+        for (let row of results.data) {
+          const address = row[0];
+          if (ethers.utils.isAddress(address)) {
+            parsedAddresses.push(address);
+          } else {
+            parsedAddresses = null;
+            settreeState(TreeError.INVALID_ADDRESS);
+            break;
+          }
+        }
+        // @dev parsedAddresses will be null if any address is not a valid keccak one
+        setaddresses(parsedAddresses);
+        if (parsedAddresses) {
+          settreeState(TreeState.TREE_NOT_SUBMITTED);
+        }
+      },
+    });
+  }
+};
+
+export const onClickUpload = async (
+  e: Event,
+  addresses: string[] | null,
+  userEntry: GroupEntry,
+  setdisableSubmit: Dispatch<SetStateAction<boolean>>,
+  settreeState: Dispatch<SetStateAction<TreeState | TreeError>>,
+  settree: Dispatch<any>,
+  setbuttonText: Dispatch<SetStateAction<string>>
+) => {
+  e.preventDefault();
+  const textOnUpload = "Submit";
+
+  const noEmptyFields = Object.values(userEntry).every(
+    (entry) => entry !== null && entry !== ""
+  );
+  if (noEmptyFields && addresses) {
+    setdisableSubmit(true);
+    const entry = {
+      groupId: userEntry.groupId!,
+      groupName: userEntry.groupName!,
+      twitterAccount: userEntry.groupTwitterAcc!,
+      description: userEntry.groupDescription!,
+      whyUseful: userEntry.groupUsefulness!,
+      howGenerated: userEntry.generationMethod!,
+      secretIndex: 42,
+    };
+    settreeState(TreeState.TREE_PRECHECKS);
+    const groupExists = await (
+      await checkGroupExists(entry, "/api/group/exists")
+    ).json();
+    if (groupExists.error) {
+      settreeState(TreeError.SERVER_ERROR);
+    } else if (groupExists.groupExists) {
+      settreeState(TreeError.GROUP_EXISTS);
+    } else if (groupExists.twitterExists) {
+      settreeState(TreeError.TWITTER_EXISTS);
+    } else {
+      settreeState(TreeState.TREE_BUILDING);
+      const tree = await generateTree(entry, addresses);
+      settreeState(TreeState.TREE_CREATING_ENTRY);
+      const groupEntry = await (
+        await createGroupEntry(tree, "/api/group/create")
+      ).json();
+      const formattedTree = formatCreateTreeJSONBody(tree);
+      // @dev api route name is imprecise since we create multiple leaves
+      settreeState(TreeState.TREE_UPLOADING_USERS);
+      const uploadedTree = await uploadTree(
+        formattedTree.leafToPathElements,
+        formattedTree.leafToPathIndices,
+        groupEntry.groupId,
+        "/api/tree/create"
+      );
+      settreeState(TreeState.TREE_UPLOADED);
+      settree(tree);
+      setbuttonText(textOnUpload);
+    }
+    setdisableSubmit(false);
+  }
 };

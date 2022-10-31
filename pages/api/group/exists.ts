@@ -30,7 +30,6 @@ export default async function handler(
       .status(200)
       .json({ twitterExists: twitterExists, groupExists: groupExists });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       error: "Error",
     });

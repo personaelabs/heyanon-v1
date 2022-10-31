@@ -29,9 +29,7 @@ export default async function handler(
       body.groupId,
       prisma
     );
-    console.log(leaf);
   }
 
-  console.log(body);
   res.status(200).json({ leaves: [] });
 }

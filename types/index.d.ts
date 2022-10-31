@@ -30,3 +30,12 @@ interface TreeDetails {
     howGenerated: string;
     secretIndex: number;
 }
+
+interface GroupEntry {
+    groupId: null | string,
+    groupName: null | string,
+    groupTwitterAcc: null | string,
+    groupDescription: null | string,
+    groupUsefulness: null | string,
+    generationMethod: null | string,
+}
