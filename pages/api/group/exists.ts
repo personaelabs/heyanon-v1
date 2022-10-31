@@ -4,6 +4,7 @@ import {
   groupNameExists,
   twitterAccountExists,
 } from "../../../lib/common/utils/heyanondb";
+import prisma from "../../../lib/prisma";
 
 type ExistsData = {
   twitterExists: boolean;
@@ -13,8 +14,6 @@ type ExistsData = {
 type ErrorData = {
   error: string;
 };
-
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,7 +30,7 @@ export default async function handler(
       .status(200)
       .json({ twitterExists: twitterExists, groupExists: groupExists });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     res.status(500).json({
       error: "Error",
     });

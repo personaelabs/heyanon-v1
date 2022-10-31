@@ -5,12 +5,12 @@ import {
   createUser,
   getUserId,
 } from "../../../lib/common/utils/heyanondb";
+import prisma from "../../../lib/prisma";
 
 type LeavesEntries = {
   leaves: any;
 };
 
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,7 +29,7 @@ export default async function handler(
       body.groupId,
       prisma
     );
-    console.log(leaf)
+    console.log(leaf);
   }
 
   console.log(body);

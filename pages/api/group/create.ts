@@ -1,11 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
+import prisma from "../../../lib/prisma";
 
 type GroupEntry = {
   groupId: any;
 };
-
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
