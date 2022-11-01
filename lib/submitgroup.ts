@@ -198,6 +198,6 @@ export const onClickUpload = async (
         }
       }
     }
-    setdisableSubmit(false);
   }
+  setdisableSubmit(false);
 };

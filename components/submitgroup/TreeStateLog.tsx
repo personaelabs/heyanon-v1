@@ -18,6 +18,6 @@ export enum TreeError {
 
 export const TreeStateLog: FunctionComponent<{ treeState: string; }> = ({ treeState }) => {
     return (
-        <div className='flex justify-center my-10'>{treeState}</div>
+        <div className='flex text-center justify-center my-10'>{treeState}</div>
     );
 };
