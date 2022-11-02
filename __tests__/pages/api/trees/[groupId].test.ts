@@ -1,5 +1,3 @@
-// __tests__/animal.test.js
-// 🚨 Remember to keep your `*.test.js` files out of your `/pages` directory!
 import { createMocks } from "node-mocks-http";
 import { describe, expect, test } from "@jest/globals";
 
@@ -9,7 +7,7 @@ import fs from "fs";
 import path from "path";
 
 describe("/api/trees/[groupId]", () => {
-  jest.setTimeout(10000);
+  jest.setTimeout(100000);
   test("database has same values as old JSON files", async () => {
     const files = fs
       .readdirSync("./__tests__/pages/api/trees")

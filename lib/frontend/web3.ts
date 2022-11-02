@@ -1,4 +1,7 @@
 import { ethers } from "ethers";
+import { SetStateAction } from "react";
+import { Stage } from "../../pages/postmsg/[groupId]";
+import { MerkleTree } from "../merkleTree";
 
 declare let window: any;
 let signer: any, provider: any, network: any;
@@ -46,3 +49,20 @@ const TYPES = {
 export const getProvider = () => provider;
 export const getSigner = () => signer;
 export const getNetwork = () => network;
+
+export const userConnectToMetamask = async (
+  merkleTree: MerkleTree | undefined,
+  setSigner: (value: any) => void,
+  setAddress: (value: SetStateAction<string>) => void,
+  setStage: (value: SetStateAction<Stage>) => void
+) => {
+  const { provider, signer, network } = await setupWeb3();
+  setSigner(signer);
+  const addr = await signer.getAddress();
+  setAddress(addr);
+  if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
+    setStage(Stage.NEWADDRESS);
+  } else {
+    setStage(Stage.MSGTYPE);
+  }
+};

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { ethers } from "ethers";
 
 import { Title, Button } from "../../components/Base";
@@ -12,7 +12,7 @@ import LoadingText from "../../components/LoadingText";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { setupWeb3 } from "../../lib/frontend/web3";
+import { setupWeb3, userConnectToMetamask } from "../../lib/frontend/web3";
 import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
 import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
@@ -20,7 +20,7 @@ import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 // tweet size minus ipfs hash length and '\n\nheyanon.xyz/verify/'
 const MAX_MESSAGE_LENGTH = 280 - 75;
 
-enum Stage {
+export enum Stage {
   CONNECTING = "Retreiving group",
   INVALID = "Invalid group :(",
   WALLET = "Connect with Metamask",
@@ -38,39 +38,39 @@ const PostMsgPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
 
-  const [isModerated, setIsModerated] = useState(false);
-  const [stage, setStage] = useState<Stage>(Stage.CONNECTING);
-  const [merkleTree, setMerkleTree] = useState<MerkleTree>();
-  const [root, setRoot] = useState<string>("");
-  const [groupName, setGroupName] = useState<string>("");
+  const [ isModerated, setIsModerated ] = useState(false);
+  const [ stage, setStage ] = useState<Stage>(Stage.CONNECTING);
+  const [ merkleTree, setMerkleTree ] = useState<MerkleTree>();
+  const [ root, setRoot ] = useState<string>("");
+  const [ groupName, setGroupName ] = useState<string>("");
 
-  const [signer, setSigner] = useState<any | null>(null);
-  const [address, setAddress] = useState<string>("");
+  const [ signer, setSigner ] = useState<any | null>(null);
+  const [ address, setAddress ] = useState<string>("");
 
-  const [jointPrefix, setJointPrefix] = useState<string>("");
-  const [msg, setMsg] = useState<string>("");
-  const [sig, setSig] = useState<string>("");
+  const [ jointPrefix, setJointPrefix ] = useState<string>("");
+  const [ msg, setMsg ] = useState<string>("");
+  const [ sig, setSig ] = useState<string>("");
 
-  const [eip712Value, setEip712Value] = useState<EIP712Value>();
-  const [msghash, setMsghash] = useState<string>("");
-  const [pubkey, setPubkey] = useState<string>("");
+  const [ eip712Value, setEip712Value ] = useState<EIP712Value>();
+  const [ msghash, setMsghash ] = useState<string>("");
+  const [ pubkey, setPubkey ] = useState<string>("");
 
-  const [loadingMessage, setLoadingMessage] = useState<string>("");
-  const [proof, setProof] = useState(null);
-  const [publicSignals, setPublicSignals] = useState(null);
+  const [ loadingMessage, setLoadingMessage ] = useState<string>("");
+  const [ proof, setProof ] = useState(null);
+  const [ publicSignals, setPublicSignals ] = useState(null);
 
-  const [slideoverOpen, setSlideoverOpen] = useState<boolean>(false);
-  const [slideoverContent, setSlideoverContent] = useState<any | null>(null);
-  const [slideoverTitle, setSlideoverTitle] = useState<string>("");
+  const [ slideoverOpen, setSlideoverOpen ] = useState<boolean>(false);
+  const [ slideoverContent, setSlideoverContent ] = useState<any | null>(null);
+  const [ slideoverTitle, setSlideoverTitle ] = useState<string>("");
 
-  const [proofIpfs, setProofIpfs] = useState(null);
-  const [tweetLink, setTweetLink] = useState(null);
+  const [ proofIpfs, setProofIpfs ] = useState(null);
+  const [ tweetLink, setTweetLink ] = useState(null);
 
-  const [msgType, setMsgType] = useState<string | null>(null);
-  const [replyId, setReplyId] = useState<string | null>(null);
+  const [ msgType, setMsgType ] = useState<string | null>(null);
+  const [ replyId, setReplyId ] = useState<string | null>(null);
 
   useEffect(() => {
-    async function getMerkleTree() {
+    async function getMerkleTree () {
       if (!groupId) {
         return;
       }
@@ -100,24 +100,7 @@ const PostMsgPage = () => {
       }
     }
     getMerkleTree();
-  }, [groupId]);
-
-  const connectToMetamask = () => {
-    const connectToMetamaskAsync = async () => {
-      const { provider, signer, network } = await setupWeb3();
-      setSigner(signer);
-      const addr = await signer.getAddress();
-      console.log(`Connected address: ${addr}`);
-      setAddress(addr);
-
-      if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
-        setStage(Stage.NEWADDRESS);
-      } else {
-        setStage(Stage.MSGTYPE);
-      }
-    };
-    connectToMetamaskAsync();
-  };
+  }, [ groupId ]);
 
   const parseReplyId = (replyTweetLink: string) => {
     setReplyId(null);
@@ -126,8 +109,8 @@ const PostMsgPage = () => {
     if (!matches) {
       return;
     }
-    console.log(matches![1]);
-    setReplyId(matches[1]);
+    console.log(matches![ 1 ]);
+    setReplyId(matches[ 1 ]);
   };
 
   const signMessage = () => {
@@ -239,8 +222,8 @@ const PostMsgPage = () => {
       setStage(Stage.PENDING);
     } else {
       const respData = await resp.json();
-      setProofIpfs(respData["ipfsHash"]);
-      setTweetLink(respData["tweetURL"]);
+      setProofIpfs(respData[ "ipfsHash" ]);
+      setTweetLink(respData[ "tweetURL" ]);
       setStage(Stage.SUCCESS);
     }
   };
@@ -442,7 +425,7 @@ const PostMsgPage = () => {
 
               <div className="flex justify-center py-2">
                 {(stage === Stage.WALLET || stage === Stage.NEWADDRESS) && (
-                  <Button onClick={connectToMetamask}>Connect Metamask</Button>
+                  <Button onClick={async () => await userConnectToMetamask(merkleTree, setSigner, setAddress, setStage)}>Connect Metamask</Button>
                 )}
                 {stage === Stage.MSGTYPE &&
                   msgType !== null &&
