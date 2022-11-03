@@ -6,8 +6,10 @@ const createJestConfig = nextJest({
 
 /** @type {import('jest').Config} */
 const customJestConfig = {
-  moduleDirectories: ['node_modules', '<rootDir>/'],
+  moduleDirectories: ['node_modules'],
   testEnvironment: 'jest-environment-jsdom',
+  coverageReporters: ['json-summary'],
+  collectCoverageFrom: ['./pages/**', './lib/**', './components/**']
 }
 
 module.exports = createJestConfig(customJestConfig)

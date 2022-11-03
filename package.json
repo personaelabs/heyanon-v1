@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
+    "coverage": "jest --coverage && yarn run istanbul-badges-readme",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
@@ -60,6 +61,7 @@
     "babel-jest": "^29.0.1",
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
+    "istanbul-badges-readme": "^1.8.2",
     "jest": "^29.2.2",
     "jest-environment-jsdom": "^29.2.2",
     "prisma": "^4.2.1",
