@@ -1,6 +1,8 @@
-import { Prisma, PrismaClient, Proof } from "@prisma/client";
+import { Prisma, Proof } from "@prisma/client";
+import axios from "axios";
 
-const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
+//@dev TODO: global config file with such URLs
+export const loadURL = "https://d27ahxc61uj811.cloudfront.net/";
 
 export type MerkleTree = Prisma.GroupGetPayload<{
   include: {
@@ -31,8 +33,10 @@ export type TAZMerkleTree = {
 
 export async function treeFromCloudfront(filename: string) {
   const link = loadURL + filename;
-  const treeResp = await fetch(link, {
-    method: "GET",
-  });
-  return treeResp.json();
+  try {
+    const response = (await axios.get(link));
+    return response.data;
+  } catch (error) {
+    return undefined;
+  }
 }

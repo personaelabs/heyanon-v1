@@ -31,6 +31,8 @@ const GroupPage = () => {
         treeFromCloudfront("daohack.json").then((tree) => {
           setMerkleTree(tree);
           setStage(Stage.VALID);
+        }).catch((e) => {
+          console.log("Error downloading daohack tree.")
         });
       } else {
         const resp = await fetch(`/api/trees/${groupId}`);
