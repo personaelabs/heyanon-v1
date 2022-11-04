@@ -16,7 +16,7 @@ When you send a message with heyanon, you generate a [zero-knowledge proof](http
 
 | Statements                  | Branches                | Functions                 | Lines             |
 | --------------------------- | ----------------------- | ------------------------- | ----------------- |
-| ![Statements](https://img.shields.io/badge/statements-5.33%25-red.svg?style=flat) | ![Branches](https://img.shields.io/badge/branches-1.23%25-red.svg?style=flat) | ![Functions](https://img.shields.io/badge/functions-3.96%25-red.svg?style=flat) | ![Lines](https://img.shields.io/badge/lines-5%25-red.svg?style=flat) |
+| ![Statements](https://img.shields.io/badge/statements-9.01%25-red.svg?style=flat) | ![Branches](https://img.shields.io/badge/branches-4.54%25-red.svg?style=flat) | ![Functions](https://img.shields.io/badge/functions-7.93%25-red.svg?style=flat) | ![Lines](https://img.shields.io/badge/lines-8.7%25-red.svg?style=flat) |
 
 Run the following
 
