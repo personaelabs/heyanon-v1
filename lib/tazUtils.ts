@@ -13,8 +13,7 @@ export default async function request(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<any> {
-  const { data }: AxiosResponse<any> = await axios(url, config);
-
+  const { data }: AxiosResponse<any> = await axios.post(url, config!.data);
   return data?.data;
 }
 
