@@ -15,5 +15,6 @@ const customJestConfig = {
   moduleNameMapper: {
     axios: "<rootDir>/node_modules/axios/dist/node/axios.cjs",
   },
+  setupFiles: ["<rootDir>/jest/setup.ts"],
 };
 module.exports = createJestConfig(customJestConfig);
