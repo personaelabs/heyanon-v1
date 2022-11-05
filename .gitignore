@@ -44,3 +44,4 @@ yarn.lock
 # data for semaphore groups
 /data/sbcSecrets.ts
 /data/sbcSecrets*.csv
+!/__mocks__/dizkus.zkey
