@@ -11,7 +11,7 @@ import Slideover from "../../components/Slideover";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { verifyProof } from "../../lib/zkp";
+import { verifyProof } from "../../lib/zkp.snarkjs";
 import { Proof } from "@prisma/client";
 
 enum FileStage {

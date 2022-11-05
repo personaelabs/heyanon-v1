@@ -4,7 +4,8 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof, bigIntToArray } from "../../lib/zkp";
+import { verifyProof} from "../../lib/zkp.snarkjs";
+import { bigIntToArray } from "../../lib/zkp";
 import { MerkleTree } from "../../lib/merkleTree";
 import { eip712MsgHash, EIP712Value } from "../../lib/hashing";
 import prisma from "../../lib/prisma";

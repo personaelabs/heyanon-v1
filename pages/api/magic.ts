@@ -4,7 +4,7 @@ import path from "path";
 
 import { postToIpfs } from "../../lib/backend/ipfs";
 import { postTweet } from "../../lib/backend/twitter";
-import { verifyProof } from "../../lib/zkp";
+import { verifyProof } from "../../lib/zkp.snarkjs";
 import prisma from "../../lib/prisma";
 import { generateSignalHash } from "../../lib/semaphore";
 import { HashedData, reputationToRoleText } from "../../lib/sbcUtils";
