@@ -5,9 +5,8 @@ import { MerkleTree } from "./merkleTree";
 import { Proof } from "@prisma/client";
 
 const localforage = require("localforage");
-const snarkjs = require("snarkjs");
 
-async function downloadFromFilename(filename: string, proofType: Proof) {
+export async function downloadFromFilename(filename: string, proofType: Proof) {
   const link = proofType.zkey_link + filename;
   try {
     const zkeyResp = await fetch(link, {
@@ -39,36 +38,6 @@ export const downloadProofFiles = async function (proofType: Proof) {
   await Promise.all(filePromises);
 };
 
-export async function generateProof(input: any, proofType: Proof) {
-  console.log("generating proof for input");
-  console.log(input);
-  const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-    input,
-    `../${proofType.filename}.wasm`,
-    `${proofType.filename}.zkey`
-  );
-  console.log(`Generated proof ${JSON.stringify(proof)}`);
-
-  return {
-    proof,
-    publicSignals,
-  };
-}
-
-export async function verifyProof(
-  proof: any,
-  publicSignals: any,
-  proofType: Proof
-) {
-  const proofVerified = await snarkjs.groth16.verify(
-    JSON.parse(proofType.vkey),
-    publicSignals,
-    proof
-  );
-
-  return proofVerified;
-}
-
 export function bigIntToArray(n: number, k: number, x: bigint) {
   let divisor = 1n;
   for (var idx = 0; idx < n; idx++) {
@@ -85,7 +54,7 @@ export function bigIntToArray(n: number, k: number, x: bigint) {
 }
 
 // taken from generation code in dizkus-circuits tests
-function pubkeyToXYArrays(pk: string) {
+export function pubkeyToXYArrays(pk: string) {
   const XArr = bigIntToArray(64, 4, BigInt("0x" + pk.slice(4, 4 + 64))).map(
     (el) => el.toString()
   );
@@ -97,7 +66,7 @@ function pubkeyToXYArrays(pk: string) {
 }
 
 // taken from generation code in dizkus-circuits tests
-function sigToRSArrays(sig: string) {
+export function sigToRSArrays(sig: string) {
   const rArr = bigIntToArray(64, 4, BigInt("0x" + sig.slice(2, 2 + 64))).map(
     (el) => el.toString()
   );

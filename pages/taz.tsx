@@ -10,7 +10,8 @@ import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { generateSignalHash } from "../lib/semaphore";
-import { generateProof, downloadProofFiles } from "../lib/zkp";
+import { generateProof } from "../lib/zkp.snarkjs";
+import { downloadProofFiles } from "../lib/zkp";
 import { MerkleTree } from "../lib/merkleTree";
 import { poseidon } from "circomlibjs";
 import { Identity } from "@semaphore-protocol/identity";
@@ -37,31 +38,31 @@ enum Stage {
 const PostMsgPage = () => {
   const router = useRouter();
 
-  const [stage, setStage] = useState<Stage>(Stage.CONNECTING);
-  const [merkleTree, setMerkleTree] = useState<MerkleTree>();
+  const [ stage, setStage ] = useState<Stage>(Stage.CONNECTING);
+  const [ merkleTree, setMerkleTree ] = useState<MerkleTree>();
 
-  const [idc, setIdc] = useState<string>("");
-  const [pubNullifier, setPubNullifier] = useState<string>("");
-  const [zkIdentity, setZKIdentity] = useState<Identity | null>(null);
+  const [ idc, setIdc ] = useState<string>("");
+  const [ pubNullifier, setPubNullifier ] = useState<string>("");
+  const [ zkIdentity, setZKIdentity ] = useState<Identity | null>(null);
 
-  const [msg, setMsg] = useState<string>("");
-  const [msgType, setMsgType] = useState<"MESSAGE" | "REPLY">("MESSAGE");
-  const [replyTweetId, setReplyTweetId] = useState<string | null>(null);
-  const [submitPending, setSubmitPending] = useState<boolean>(false);
+  const [ msg, setMsg ] = useState<string>("");
+  const [ msgType, setMsgType ] = useState<"MESSAGE" | "REPLY">("MESSAGE");
+  const [ replyTweetId, setReplyTweetId ] = useState<string | null>(null);
+  const [ submitPending, setSubmitPending ] = useState<boolean>(false);
 
-  const [loadingMessage, setLoadingMessage] = useState<string>("");
-  const [proof, setProof] = useState(null);
-  const [publicSignals, setPublicSignals] = useState(null);
+  const [ loadingMessage, setLoadingMessage ] = useState<string>("");
+  const [ proof, setProof ] = useState(null);
+  const [ publicSignals, setPublicSignals ] = useState(null);
 
-  const [slideoverOpen, setSlideoverOpen] = useState<boolean>(false);
-  const [slideoverContent, setSlideoverContent] = useState<any | null>(null);
-  const [slideoverTitle, setSlideoverTitle] = useState<string>("");
+  const [ slideoverOpen, setSlideoverOpen ] = useState<boolean>(false);
+  const [ slideoverContent, setSlideoverContent ] = useState<any | null>(null);
+  const [ slideoverTitle, setSlideoverTitle ] = useState<string>("");
 
-  const [proofIpfs, setProofIpfs] = useState(null);
-  const [tweetLink, setTweetLink] = useState(null);
+  const [ proofIpfs, setProofIpfs ] = useState(null);
+  const [ tweetLink, setTweetLink ] = useState(null);
 
   useEffect(() => {
-    async function getMerkleTree() {
+    async function getMerkleTree () {
       // get our metadata
       const resp = await fetch(`/api/trees/taz`);
       const respData: MerkleTree = await resp.json();
@@ -74,10 +75,10 @@ const PostMsgPage = () => {
         const merkleProof = groupObj.generateProofOfMembership(
           groupObj.indexOf(BigInt(member))
         );
-        respData.leafToPathElements[member] = merkleProof.siblings.map((el) =>
+        respData.leafToPathElements[ member ] = merkleProof.siblings.map((el) =>
           el.toString()
         );
-        respData.leafToPathIndices[member] = merkleProof.pathIndices.map((el) =>
+        respData.leafToPathIndices[ member ] = merkleProof.pathIndices.map((el) =>
           el.toString()
         );
       }
@@ -89,8 +90,8 @@ const PostMsgPage = () => {
           setStage(Stage.GOTOTAZ);
           return;
         }
-        const [nullifier, trapdoor] = window.location.hash.slice(1).split("_");
-        serializedIdentity = JSON.stringify([nullifier, trapdoor]);
+        const [ nullifier, trapdoor ] = window.location.hash.slice(1).split("_");
+        serializedIdentity = JSON.stringify([ nullifier, trapdoor ]);
       } else {
         if (localStorage.getItem("serializedIdentity") === null) {
           setStage(Stage.GOTOTAZ);
@@ -130,7 +131,7 @@ const PostMsgPage = () => {
     if (!matches) {
       return;
     }
-    setReplyTweetId(matches[1]);
+    setReplyTweetId(matches[ 1 ]);
   };
 
   const castMessage = () => {
@@ -149,8 +150,8 @@ const PostMsgPage = () => {
       const input = {
         identityTrapdoor: zkIdentity!.getTrapdoor().toString(),
         identityNullifier: zkIdentity!.getNullifier().toString(),
-        treePathIndices: merkleTree.leafToPathIndices[idc],
-        treeSiblings: merkleTree.leafToPathElements[idc],
+        treePathIndices: merkleTree.leafToPathIndices[ idc ],
+        treeSiblings: merkleTree.leafToPathElements[ idc ],
         externalNullifier: merkleTree.ext_nullifier,
         signalHash: generateSignalHash(JSON.stringify(hashedData)).toString(),
       };
@@ -197,8 +198,8 @@ const PostMsgPage = () => {
     });
 
     const respData = await resp.json();
-    setProofIpfs(respData["ipfsHash"]);
-    setTweetLink(respData["tweetURL"]);
+    setProofIpfs(respData[ "ipfsHash" ]);
+    setTweetLink(respData[ "tweetURL" ]);
     setStage(Stage.SUCCESS);
     setSubmitPending(false);
   };

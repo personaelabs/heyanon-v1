@@ -14,7 +14,8 @@ const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { setupWeb3, userConnectToMetamask } from "../../lib/frontend/web3";
 import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
-import { buildInput, generateProof, downloadProofFiles } from "../../lib/zkp";
+import { buildInput, downloadProofFiles } from "../../lib/zkp";
+import { generateProof } from "../../lib/zkp.snarkjs"
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
 
 // tweet size minus ipfs hash length and '\n\nheyanon.xyz/verify/'

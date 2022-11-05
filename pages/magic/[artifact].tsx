@@ -10,7 +10,8 @@ import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
 import { generateSignalHash } from "../../lib/semaphore";
-import { generateProof, downloadProofFiles } from "../../lib/zkp";
+import { downloadProofFiles } from "../../lib/zkp";
+import { generateProof } from "../../lib/zkp.snarkjs";
 import { MerkleTree } from "../../lib/merkleTree";
 import { Identity } from "@semaphore-protocol/identity";
 import { poseidon } from "circomlibjs";
