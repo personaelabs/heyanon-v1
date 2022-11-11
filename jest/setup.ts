@@ -16,3 +16,9 @@ global.TextDecoder = TextDecoder;
  * @dev a polyfill for mocking fetch 
  */
 require('jest-fetch-mock').enableMocks()
+
+declare global {
+    interface Window {
+        ethereum: null | any;
+    }
+}
