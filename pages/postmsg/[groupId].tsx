@@ -12,28 +12,15 @@ import LoadingText from "../../components/LoadingText";
 import dynamic from "next/dynamic";
 const DynamicReactJson = dynamic(import("react-json-view"), { ssr: false });
 
-import { setupWeb3, userConnectToMetamask } from "../../lib/frontend/web3";
+import { userConnectToMetamask } from "../../lib/frontend/web3";
 import { eip712MsgHash, eip712Sign, EIP712Value } from "../../lib/hashing";
 import { buildInput, downloadProofFiles } from "../../lib/zkp";
-import { generateProof } from "../../lib/zkp.snarkjs"
+import { generateProof } from "../../lib/zkp.snarkjs";
 import { MerkleTree, treeFromCloudfront } from "../../lib/merkleTree";
+import { Stage } from "../../lib/frontend/proofStages";
 
 // tweet size minus ipfs hash length and '\n\nheyanon.xyz/verify/'
 const MAX_MESSAGE_LENGTH = 280 - 75;
-
-export enum Stage {
-  CONNECTING = "Retreiving group",
-  INVALID = "Invalid group :(",
-  WALLET = "Connect with Metamask",
-  NEWADDRESS = "Invalid address, please change",
-  MSGTYPE = "Select message type",
-  TWEET = "Enter your tweet & sign",
-  GENERATE = "Generate a ZK proof",
-  INPROGRESS = "Proof is being generated",
-  SUBMIT = "Submit proof and message",
-  PENDING = "Message has been submitted for approval",
-  SUCCESS = "Message has been posted!",
-}
 
 const PostMsgPage = () => {
   const router = useRouter();

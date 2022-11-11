@@ -1,12 +1,13 @@
 import { ethers } from "ethers";
 import { SetStateAction } from "react";
-import { Stage } from "../../pages/postmsg/[groupId]";
 import { MerkleTree } from "../merkleTree";
+import { Stage } from "./proofStages";
+import { setupWeb3 } from "./setup";
 
 declare let window: any;
 let signer: any, provider: any, network: any;
 
-function changeNetworkName(network: any) {
+export function changeNetworkName(network: any) {
   switch (network.chainId) {
     case 1:
       network.name = "mainnet";
@@ -14,22 +15,6 @@ function changeNetworkName(network: any) {
     default:
       return network;
   }
-}
-
-export async function setupWeb3() {
-  console.log("Attempting to set up web3");
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  console.log(provider);
-  await provider.send("eth_requestAccounts", []);
-  const currentNetwork = await provider.getNetwork();
-  provider.on("network", (newNetwork: any, oldNetwork: any) => {
-    if (oldNetwork) {
-      window.location.reload();
-      network = changeNetworkName(newNetwork);
-    }
-  });
-  const signer = provider.getSigner();
-  return { provider, signer, network: changeNetworkName(currentNetwork) };
 }
 
 const DOMAIN = {
@@ -60,6 +45,7 @@ export const userConnectToMetamask = async (
   setSigner(signer);
   const addr = await signer.getAddress();
   setAddress(addr);
+  console.log(addr, merkleTree?.leafToPathElements)
   if (!(BigInt(addr).toString() in merkleTree!.leafToPathElements)) {
     setStage(Stage.NEWADDRESS);
   } else {
