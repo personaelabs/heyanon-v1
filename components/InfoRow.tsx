@@ -9,7 +9,6 @@ type Props = {
 export default function InfoRow({ name, content, color }: Props) {
   let className = "font-bold ";
   if (color) className = className += color;
-
   return (
     <div>
       <span className={className}>

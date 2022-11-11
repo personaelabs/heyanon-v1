@@ -74,7 +74,7 @@ const GroupPage = () => {
                 <div className="flex justify-center text-center">
                   <Title>{groupId}</Title>
                 </div>
-                <LoadingText currentStage="Retreiving group" isProof={false} />
+                <LoadingText currentStage="Retrieving group" isProof={false} />
               </>
             )}
 
