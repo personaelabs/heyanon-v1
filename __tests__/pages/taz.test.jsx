@@ -21,6 +21,10 @@ describe("Testing taz page", () => {
   it("displays loading title on loading", () => {
     const { container } = render(<PostMsgPage />);
     const title = container.getElementsByTagName("h1");
-    expect(title[0].textContent).toEqual(Stage.CONNECTING);
+    expect(title[0].textContent).toEqual(` ${Stage.CONNECTING} `);
   });
+  
+  it("invites to redirect to TAZ upon invalid url", () => {
+
+  })
 });
